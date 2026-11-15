@@ -113,7 +113,7 @@ shfmt -i 2 -ci -d deploy/install-ubuntu.sh deploy/scripts/*.sh scripts/format.sh
 
 Prettier の対象範囲は、Workers の TypeScript / JSON と、設定ファイル（`config/*.yaml`、`.github/workflows/*.yml`、`.github/dependabot.yml`）です。リポジトリ全体の Markdown は対象外です。
 
-セクション見出しのバナーコメントは、言語ごとのコメント記号（Go / TypeScript は `//`、Shell / PowerShell / YAML は `#`、SQL は `--`）を使い、`=` の罫線の長さはタイトル行の表示幅（全角文字は2、半角文字は1として計算）に合わせて上下で揃えます。新しいセクションを追加するときも、この規則で罫線の長さをタイトルに合わせてください。
+セクション見出しのバナーコメントは、言語ごとのコメント記号（Go / TypeScript は `//`、Shell / PowerShell / YAML は `#`、SQL は `--`）を使い、1行式で `// ===== 1. 見出し =====` の形にします。セクション内の小見出しは罫線を `-` にした1行式で、番号は「セクション番号.連番」とします（例: `// ----- 2.1 受信ゴルーチン -----`）。新しいセクションや小見出しを追加するときも、この形式に合わせてください。
 
 ## 5. 整形自動化
 

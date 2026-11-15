@@ -14,6 +14,7 @@ async function main(): Promise<void> {
       return;
     }
 
+    // ----- 1.1 コマンド処理 -----
     if (event.event_type === 'INTERACTION_CREATE') {
       const interaction = event.payload as unknown as InteractionPayload & { interaction_ref?: string };
       if (!interaction.interaction_ref) return;
@@ -71,6 +72,7 @@ async function main(): Promise<void> {
       return;
     }
 
+    // ----- 1.2 メッセージ読み上げ -----
     if (event.event_type === 'MESSAGE_CREATE') {
       const message = event.payload as unknown as DiscordMessagePayload;
       if (message.author?.bot || !message.guild_id || !message.content) return;

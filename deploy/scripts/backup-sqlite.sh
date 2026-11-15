@@ -31,6 +31,8 @@ sqlite3 "$DB" ".backup '$DB_FILE'"
 # ===== Event payloads are deliberately excluded from portable backups. Keeping event =====
 # ===== metadata/status is useful for audit, but replaying an old inbox after restore is =====
 # ===== unsafe and would extend message-content retention to the backup retention period. =====
+
+# ----- 2.1 ペイロード除去 -----
 sqlite3 "$DB_FILE" <<'SQL'
 BEGIN IMMEDIATE;
 UPDATE event_inbox

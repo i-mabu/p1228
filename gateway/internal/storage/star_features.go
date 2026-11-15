@@ -65,6 +65,7 @@ func (s *Storage) SetGuildFeatureSetting(ctx context.Context, guildID, key strin
 	return err
 }
 
+// ----- 2.1 ブラックリスト -----
 func (s *Storage) AddGuildBlacklist(ctx context.Context, guildID, userID, reason string) error {
 	if strings.TrimSpace(guildID) == "" || strings.TrimSpace(userID) == "" || utf8.RuneCountInString(reason) > 500 {
 		return errors.New("valid guild_id and user_id are required")
@@ -218,6 +219,7 @@ func (s *Storage) EarnPoints(ctx context.Context, guildID, userID, eventID strin
 	return result, tx.Commit()
 }
 
+// ----- 4.1 抽選 -----
 func (s *Storage) DrawLottery(ctx context.Context, guildID, userID, eventID string, cost, prize, chance int64) (PointResult, bool, error) {
 	if guildID == "" || userID == "" || eventID == "" || cost < 1 || prize < 0 || chance < 0 || chance > 100 {
 		return PointResult{}, false, errors.New("invalid lottery parameters")
@@ -287,6 +289,7 @@ func (s *Storage) DrawLottery(ctx context.Context, guildID, userID, eventID stri
 	return points, won, tx.Commit()
 }
 
+// ----- 4.2 おみくじ -----
 func (s *Storage) DrawOmikuji(ctx context.Context, guildID, userID, eventID string) (string, error) {
 	if guildID == "" || userID == "" || eventID == "" {
 		return "", errors.New("guild_id, user_id and event_id are required")
@@ -375,6 +378,7 @@ func (s *Storage) ListShopItems(ctx context.Context, guildID string) ([]ShopItem
 	return items, rows.Err()
 }
 
+// ----- 5.1 購入処理 -----
 func (s *Storage) BuyShopItem(ctx context.Context, guildID, userID, itemID, eventID string) (ShopItem, PointResult, bool, error) {
 	if guildID == "" || userID == "" || itemID == "" || eventID == "" {
 		return ShopItem{}, PointResult{}, false, errors.New("guild_id, user_id, item_id and event_id are required")

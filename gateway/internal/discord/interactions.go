@@ -95,6 +95,7 @@ func (s *InteractionStore) AutoDefer(ctx context.Context, expectedBotID, ref str
 	return err
 }
 
+// ----- 2.1 アクション実行 -----
 func (s *InteractionStore) Do(ctx context.Context, expectedBotID, ref, action string, body json.RawMessage) error {
 	s.mu.Lock()
 	current, ok := s.refs[ref]
@@ -242,6 +243,7 @@ func (s *InteractionStore) request(ctx context.Context, method, path string, bod
 	return last
 }
 
+// ----- 3.1 パス生成 -----
 func interactionCallbackPath(v *interactionRef) string {
 	return fmt.Sprintf("/interactions/%s/%s/callback", url.PathEscape(v.InteractionID), url.PathEscape(v.Token))
 }

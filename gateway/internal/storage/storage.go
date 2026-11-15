@@ -39,6 +39,7 @@ type Storage struct {
 	writeMu sync.Mutex
 }
 
+// ----- 1.1 イベントとセッションの型 -----
 type Event struct {
 	ProtocolVersion int             `json:"protocol_version"`
 	EventID         string          `json:"event_id"`
@@ -139,6 +140,7 @@ func (s *Storage) PruneExpiredEvents(ctx context.Context, retentionHours int) (i
 
 func (s *Storage) DB() *sql.DB { return s.db }
 
+// ----- 2.1 マイグレーション実行 -----
 func (s *Storage) migrate(ctx context.Context) error {
 	s.writeMu.Lock()
 	defer s.writeMu.Unlock()
@@ -186,6 +188,7 @@ func (s *Storage) migrate(ctx context.Context) error {
 	return tx.Commit()
 }
 
+// ----- 2.2 IDと時刻のヘルパー -----
 func randomID(prefix string) string {
 	var b [16]byte
 	if _, err := rand.Read(b[:]); err != nil {
@@ -223,6 +226,7 @@ func (s *Storage) RecordDispatch(ctx context.Context, sess Session, ev *Event) e
 	return tx.Commit()
 }
 
+// ----- 3.1 セッション管理 -----
 func (s *Storage) LoadSession(ctx context.Context, botID string) (Session, error) {
 	var v Session
 	err := s.db.QueryRowContext(ctx, `SELECT bot_id,session_id,resume_gateway_url,last_sequence,bot_user_id FROM gateway_sessions WHERE bot_id=?`, botID).Scan(&v.BotID, &v.SessionID, &v.ResumeURL, &v.Sequence, &v.BotUserID)
@@ -239,6 +243,7 @@ func (s *Storage) ClearSession(ctx context.Context, botID string) error {
 	return err
 }
 
+// ----- 3.2 イベントの受け渡し -----
 func (s *Storage) ClaimEvent(ctx context.Context, botID, instanceID string, leaseSeconds, maxAttempts int) (*ClaimedEvent, error) {
 	s.writeMu.Lock()
 	defer s.writeMu.Unlock()
@@ -346,6 +351,7 @@ func (s *Storage) IsWorkerRegistered(ctx context.Context, instanceID, workerID, 
 	return count == 1, err
 }
 
+// ----- 4.1 ハートビート -----
 func (s *Storage) Heartbeat(ctx context.Context, instanceID, workerID, botID string) error {
 	// ===== Take the same write lock as every other mutating method so heartbeat =====
 	// ===== updates stay serialized with registrations and event claims. =====
@@ -477,6 +483,8 @@ func (s *Storage) PutReadAloudSettings(ctx context.Context, scope, scopeID strin
 	}
 	return rev, tx.Commit()
 }
+
+// ----- 6.1 辞書 -----
 func (s *Storage) ListDictionary(ctx context.Context, scope, scopeID string) ([]DictionaryEntry, error) {
 	if scope == "" {
 		scope = "global"
@@ -537,6 +545,7 @@ func (s *Storage) PutDictionaryEntry(ctx context.Context, scope, scopeID, word, 
 	return tx.Commit()
 }
 
+// ----- 6.2 統計とデッドレター -----
 func (s *Storage) CountByStatus(ctx context.Context, botID string) (map[string]int, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT status,COUNT(*) FROM event_inbox WHERE bot_id=? GROUP BY status`, botID)
 	if err != nil {

@@ -40,6 +40,8 @@ type Manager struct {
 	workerFailed map[string]bool
 	startedAt    time.Time
 }
+
+// ----- 1.1 WebSocket接続とペイロードの型 -----
 type wsConnection struct {
 	conn    *websocket.Conn
 	writeMu sync.Mutex
@@ -165,6 +167,8 @@ func (m *Manager) connect(ctx context.Context, botID string) error {
 	conn.SetReadLimit(8 << 20)
 	frames := make(chan []byte, 64)
 	readErr := make(chan error, 1)
+
+	// ----- 2.1 受信ゴルーチン -----
 	go func() {
 		for {
 			_, b, e := conn.ReadMessage()
@@ -207,6 +211,8 @@ func (m *Manager) connect(ctx context.Context, botID string) error {
 	if hd.HeartbeatInterval < 1000 {
 		return fmt.Errorf("invalid heartbeat interval: %d", hd.HeartbeatInterval)
 	}
+
+	// ----- 2.2 ResumeとIdentify -----
 	if sess.SessionID != "" && sess.Sequence >= 0 {
 		if err := wc.writeJSON(map[string]any{"op": 6, "d": map[string]any{"token": bot.Token, "session_id": sess.SessionID, "seq": sess.Sequence}}); err != nil {
 			return err
@@ -295,6 +301,7 @@ func workerMissingAfterStartupGrace(startedAt, now time.Time) bool {
 	return !startedAt.IsZero() && now.Sub(startedAt) > workerStartupGrace
 }
 
+// ----- 3.1 プレゼンス生成 -----
 func presenceUpdate(bot config.BotConfig) map[string]any {
 	return workerPresenceUpdate(bot, false)
 }
@@ -322,6 +329,7 @@ func (m *Manager) workerPresence(botID string, bot config.BotConfig) map[string]
 	return workerPresenceUpdate(bot, failed)
 }
 
+// ----- 3.2 Worker監視ループ -----
 func (m *Manager) monitorWorkers(ctx context.Context) {
 	ticker := time.NewTicker(workerMonitorInterval)
 	defer ticker.Stop()
@@ -385,6 +393,7 @@ func (m *Manager) setWorkerFailure(botID string, failed bool, lastHeartbeat time
 	}
 }
 
+// ----- 3.3 Gateway情報の取得 -----
 func (m *Manager) getGatewayBot(ctx context.Context, token string) (gatewayBotInfo, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://discord.com/api/v10/gateway/bot", nil)
 	if err != nil {
@@ -415,6 +424,8 @@ func (m *Manager) handleDispatch(ctx context.Context, botID string, p gatewayPay
 	if err != nil {
 		return err
 	}
+
+	// ----- 4.1 セッション確立イベント -----
 	if p.T == "READY" {
 		if v, ok := d["session_id"].(string); ok {
 			sess.SessionID = v
@@ -437,6 +448,8 @@ func (m *Manager) handleDispatch(ctx context.Context, botID string, p gatewayPay
 	}
 	var ev *storage.Event
 	if shouldQueue(botID, p.T) {
+
+		// ----- 4.2 インタラクションの振り分け -----
 		if p.T == "INTERACTION_CREATE" {
 			iid, _ := d["id"].(string)
 			token, _ := d["token"].(string)
@@ -507,6 +520,8 @@ func (m *Manager) handleDispatch(ctx context.Context, botID string, p gatewayPay
 	if (botID == "read_aloud_a" || botID == "read_aloud_b") && (p.T == "VOICE_SERVER_UPDATE" || p.T == "VOICE_STATE_UPDATE") {
 		// ===== The adapter only needs this BOT's own voice-state updates. Filtering unrelated =====
 		// ===== guild-member state changes keeps the short-lived in-memory queue bounded. =====
+
+		// ----- 4.3 音声状態イベント -----
 		if p.T == "VOICE_STATE_UPDATE" && stringField(d, "user_id") != sess.BotUserID {
 			return nil
 		}
@@ -520,6 +535,8 @@ func (m *Manager) handleDispatch(ctx context.Context, botID string, p gatewayPay
 	}
 	return nil
 }
+
+// ----- 4.4 キュー対象の判定 -----
 func shouldQueue(botID, t string) bool {
 	switch t {
 	case "MESSAGE_CREATE", "MESSAGE_UPDATE", "MESSAGE_DELETE", "MESSAGE_DELETE_BULK", "INTERACTION_CREATE":
@@ -557,6 +574,7 @@ func (m *Manager) ClaimVoiceEvent(botID string) *storage.Event {
 	}
 }
 
+// ----- 5.1 音声ペイロード送信 -----
 func (m *Manager) SendVoicePayload(botID string, payload json.RawMessage) error {
 	var v struct {
 		Op int             `json:"op"`
@@ -595,6 +613,7 @@ func (c *wsConnection) writeJSON(v any) error {
 	return c.conn.WriteJSON(v)
 }
 
+// ----- 5.2 REST操作 -----
 func (m *Manager) DiscordOperation(ctx context.Context, botID string, op map[string]json.RawMessage) (int, []byte, error) {
 	bot, ok := m.cfg.Bots[botID]
 	if !ok {

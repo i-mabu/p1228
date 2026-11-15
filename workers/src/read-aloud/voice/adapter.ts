@@ -49,6 +49,7 @@ export class P1228VoiceAdapter {
     return this.implementer;
   }
 
+  // ----- 2.1 音声イベントの受付 -----
   onVoiceStateUpdate(data: VoiceStatePayload): void {
     if (data.guild_id === this.guildId) this.methods.onVoiceStateUpdate(data as never);
   }
@@ -57,6 +58,7 @@ export class P1228VoiceAdapter {
     if (data.guild_id === this.guildId) this.methods.onVoiceServerUpdate(data as never);
   }
 
+  // ----- 2.2 終了と失敗処理 -----
   destroy(): void {
     this.stop();
     this.methods.destroy();

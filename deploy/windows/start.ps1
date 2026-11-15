@@ -46,6 +46,7 @@ $gateway = Invoke-P1228WithIsolatedEnvironment $gatewayEnvironment {
 }
 Set-Content -Path (Join-Path $logDir 'gateway.pid') -Value $gateway.Id
 
+# ----- 3.1 ヘルスチェック -----
 $healthUrl = 'http://127.0.0.1:8787/internal/v1/health'
 $ready = $false
 $lastHealthError = 'no response received'

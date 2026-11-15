@@ -42,6 +42,7 @@ export class GatewayClient {
     return parsed as T;
   }
 
+  // ----- 1.1 登録とハートビート -----
   async register(): Promise<void> {
     await this.request('worker/register', 'POST', { instance_id: this.instanceId });
   }
@@ -50,6 +51,7 @@ export class GatewayClient {
     await this.request('worker/heartbeat', 'POST', { instance_id: this.instanceId });
   }
 
+  // ----- 1.2 イベントの受付 -----
   async claim(): Promise<EventEnvelope | null> {
     const result = await this.request<{ event: EventEnvelope | null }>('events/claim', 'POST', { instance_id: this.instanceId });
     return result.event;
@@ -63,6 +65,7 @@ export class GatewayClient {
     await this.request(`events/${encodeURIComponent(event.event_id)}/nack`, 'POST', { lease_token: event.lease_token, reason: reason.slice(0, 1000) });
   }
 
+  // ----- 1.3 Discord操作 -----
   async discordOperation<T = Record<string, unknown>>(operation: string, fields: Record<string, unknown>, operationId: string = randomUUID()): Promise<T> {
     return this.request<T>('discord/operations', 'POST', { operation_id: operationId, operation, ...fields });
   }
@@ -75,6 +78,7 @@ export class GatewayClient {
     await this.request('voice/gateway-payload', 'POST', { payload });
   }
 
+  // ----- 1.4 設定と辞書の取得 -----
   async getSettings(scope: 'global' | 'guild' | 'user', scopeId: string): Promise<{ revision: number; settings: ReadAloudSettings }> {
     const qs = new URLSearchParams({ scope, scope_id: scopeId });
     return this.request(`data/read-aloud/settings?${qs.toString()}`);
@@ -86,6 +90,7 @@ export class GatewayClient {
     return result.entries;
   }
 
+  // ----- 1.5 星燈機能：設定 -----
   async getStarSettings(guildId: string): Promise<Record<string, unknown>> {
     const query = new URLSearchParams({ guild_id: guildId });
     const result = await this.request<{ settings: Record<string, unknown> }>(`data/star/settings?${query}`);
@@ -96,6 +101,7 @@ export class GatewayClient {
     await this.request('data/star/settings', 'PUT', { guild_id: guildId, key, value });
   }
 
+  // ----- 1.6 星燈機能：ブラックリスト -----
   async isBlacklisted(guildId: string, userId: string): Promise<boolean> {
     const query = new URLSearchParams({ guild_id: guildId, user_id: userId });
     const result = await this.request<{ blacklisted: boolean }>(`data/star/blacklist?${query}`);
@@ -110,6 +116,7 @@ export class GatewayClient {
     await this.request('data/star/blacklist', 'DELETE', { guild_id: guildId, user_id: userId });
   }
 
+  // ----- 1.7 星燈機能：スティッキー -----
   async getStickyMessages(guildId: string): Promise<StickyMessage[]> {
     const query = new URLSearchParams({ guild_id: guildId });
     const result = await this.request<{ items: StickyMessage[] }>(`data/star/sticky?${query}`);
@@ -133,11 +140,13 @@ export class GatewayClient {
     await this.request('data/star/sticky', 'DELETE', { guild_id: guildId, channel_id: channelId });
   }
 
+  // ----- 1.8 星燈機能：ポイント -----
   async starPoints<T>(action: string, fields: Record<string, unknown>): Promise<T> {
     const result = await this.request<{ result: T }>('data/star/points', 'POST', { action, ...fields });
     return result.result;
   }
 
+  // ----- 1.9 星燈機能：ショップ -----
   async getShop(guildId: string): Promise<ShopItem[]> {
     const query = new URLSearchParams({ guild_id: guildId });
     const result = await this.request<{ items: ShopItem[] }>(`data/star/shop?${query}`);
@@ -156,6 +165,7 @@ export class GatewayClient {
     await this.request('data/star/shop', 'POST', { action: 'fulfill', guild_id: guildId, user_id: userId, item_id: itemId });
   }
 
+  // ----- 1.10 ロール付与 -----
   async addRole(guildId: string, userId: string, roleId: string, operationId: string = randomUUID()): Promise<void> {
     await this.discordOperation('add_role', { guild_id: guildId, user_id: userId, role_id: roleId }, operationId);
   }

@@ -41,6 +41,7 @@ if [[ ! -f /etc/p1228/gateway.yaml ]]; then install -m 0640 -o root -g p1228 "$R
 install -d -m 0755 /etc/systemd/journald.conf.d
 install -m 0644 "$ROOT/deploy/journald/limits.conf" /etc/systemd/journald.conf.d/p1228-limits.conf
 
+# ----- 3.1 環境ファイルの生成 -----
 write_env_if_missing() {
   local target="$1"
   if [[ ! -e "$target" ]]; then

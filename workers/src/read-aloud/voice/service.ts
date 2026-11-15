@@ -76,6 +76,7 @@ export class ReadAloudVoiceService {
     logger.info('voice_left', { bot_id: this.client.botID, guild_id: guildId });
   }
 
+  // ----- 2.1 音声イベントの振り分け -----
   routeVoiceEvent(type: string, payload: VoiceStatePayload | VoiceServerPayload): void {
     const guildId = payload.guild_id;
     const session = this.sessions.get(guildId);
@@ -89,6 +90,7 @@ export class ReadAloudVoiceService {
     return session?.connection.state.status === VoiceConnectionStatus.Ready;
   }
 
+  // ----- 2.2 読み上げキュー -----
   async speak(guildId: string, rawText: string, settingsOverride?: Partial<ReadAloudSettings>, userId?: string): Promise<void> {
     const session = this.sessions.get(guildId);
     if (!session) throw new Error('BOT is not connected to a voice channel. Use /join first.');
@@ -140,6 +142,7 @@ export class ReadAloudVoiceService {
     }
   }
 
+  // ----- 2.3 メッセージ読み上げの判定 -----
   async maybeReadMessage(guildId: string, userId: string | undefined, text: string): Promise<void> {
     if (!guildId || !text.trim() || !this.sessions.has(guildId)) return;
     const snapshot = await this.getSettings(guildId, userId);
@@ -147,6 +150,7 @@ export class ReadAloudVoiceService {
     await this.speak(guildId, text, undefined, userId);
   }
 
+  // ----- 2.4 設定と辞書の適用 -----
   private async getSettings(guildId: string, userId?: string): Promise<{ revision: string; settings: ReadAloudSettings }> {
     const scopes: Array<{ scope: 'global' | 'guild' | 'user'; scopeId: string }> = [
       { scope: 'global', scopeId: 'global' },

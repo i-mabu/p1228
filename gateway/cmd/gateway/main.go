@@ -42,6 +42,8 @@ func run() error {
 		return err
 	}
 	defer store.Close()
+
+	// ----- 2.1 Bot登録 -----
 	for botID, bot := range cfg.Bots {
 		if err := store.UpsertBot(context.Background(), botID, bot.DisplayName, bot.ApplicationID); err != nil {
 			log.Error("bot registry initialization failed", "bot_id", botID, "error", err)
@@ -54,6 +56,7 @@ func run() error {
 	// ===== passed directly instead of copying it entry by entry. =====
 	api := server.New(cfg, store, manager, cfg.Workers, log)
 
+	// ----- 2.2 終了シグナルと定期クリーンアップ -----
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	manager.Start(ctx)
@@ -77,6 +80,7 @@ func run() error {
 		}
 	}()
 
+	// ----- 2.3 起動とシャットダウン -----
 	serveErr := make(chan error, 1)
 	go func() { serveErr <- api.ListenAndServe() }()
 	var runErr error

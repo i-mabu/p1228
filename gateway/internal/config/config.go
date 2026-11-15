@@ -67,6 +67,8 @@ func Load(path string) (*Config, error) {
 	if err := decoder.Decode(&c); err != nil {
 		return nil, fmt.Errorf("parse config: %w", err)
 	}
+
+	// ----- 2.1 既定値の適用 -----
 	if c.Gateway.ListenAddress == "" {
 		c.Gateway.ListenAddress = "127.0.0.1"
 	}
@@ -85,6 +87,8 @@ func Load(path string) (*Config, error) {
 	if c.Gateway.EventPayloadRetentionHours == 0 {
 		c.Gateway.EventPayloadRetentionHours = 24
 	}
+
+	// ----- 2.2 検証 -----
 	if ip := net.ParseIP(c.Gateway.ListenAddress); ip == nil || !ip.IsLoopback() {
 		return nil, errors.New("gateway.listen_address must be a loopback address (127.0.0.1 or ::1)")
 	}

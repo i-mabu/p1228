@@ -70,6 +70,7 @@ export class AudioEngineClient {
     return Readable.from(audio);
   }
 
+  // ----- 2.1 キャッシュ管理 -----
   private async readCache(path: string): Promise<Buffer | null> {
     try {
       const info = await stat(path);

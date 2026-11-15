@@ -28,6 +28,7 @@ func TestRoleOperationsRestrictedToGeneralBot(t *testing.T) {
 	}
 }
 
+// ----- 1.1 メッセージ送信と編集 -----
 func TestEditMessageRejectsContentOverDiscordLimit(t *testing.T) {
 	manager := NewManager(&config.Config{Bots: map[string]config.BotConfig{
 		"general": {Token: "test-token"},
@@ -99,6 +100,7 @@ func TestSendMessageRejectsNonArrayComponents(t *testing.T) {
 	}
 }
 
+// ----- 1.2 機能ディスパッチのスコープ -----
 func TestFeatureDispatchesAreScopedToGeneralBot(t *testing.T) {
 	tests := []struct {
 		botID string
@@ -182,6 +184,7 @@ func TestPresenceUpdateUsesWatchingActivity(t *testing.T) {
 	}
 }
 
+// ----- 2.1 Worker不在の検知 -----
 func TestWorkerMissingDetectionWaitsForStartupGrace(t *testing.T) {
 	startedAt := time.Now()
 	if workerMissingAfterStartupGrace(startedAt, startedAt.Add(workerStartupGrace-time.Second)) {

@@ -12,6 +12,7 @@ const guildNames = new Map<string, string>();
 const memberRoles: RoleCache = new Map();
 const voiceChannels = new Map<string, string>();
 
+// ----- 1.1 定義用ヘルパー -----
 const option = (name: string, description: string, type: number, required = false, extra: Record<string, unknown> = {}) => ({
   name,
   description,
@@ -190,6 +191,7 @@ function optionString(options: Map<string, string | number>, name: string): stri
   return value === undefined ? '' : String(value);
 }
 
+// ----- 3.1 権限とIDの解決 -----
 function isGuildAdmin(interaction: InteractionPayload): boolean {
   try {
     const permissions = BigInt(interaction.member?.permissions ?? '0');
@@ -244,6 +246,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
   let message: string;
 
   if (commandName === 'welcome' || commandName === 'goodbye') {
+    // ----- 5.1 参加・退出メッセージ -----
     const key = commandName === 'welcome' ? 'member_join' : 'member_leave';
     const channelId = optionString(options, 'channel');
     if (subcommandName === 'disable') {
@@ -254,6 +257,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
       message = `${commandName === 'welcome' ? '参加' : '退出'}メッセージを設定しました。`;
     }
   } else if (commandName === 'autorole') {
+    // ----- 5.2 自動ロール -----
     if (subcommandName === 'disable') {
       await client.setStarSetting(guildId, 'autorole', null);
       message = '自動ロールを無効にしました。';
@@ -262,6 +266,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
       message = '自動ロールを設定しました。';
     }
   } else if (commandName === 'blacklist') {
+    // ----- 5.3 ブラックリスト -----
     const targetId = optionString(options, 'user');
     if (subcommandName === 'add') {
       await client.setBlacklist(guildId, targetId, optionString(options, 'reason'));
@@ -271,6 +276,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
       message = 'ユーザーをブラックリストから削除しました。';
     }
   } else if (commandName === 'logs') {
+    // ----- 5.4 ログ設定 -----
     const eventType = optionString(options, 'event');
     const targetId = optionString(options, 'target_id');
     const key = eventType === 'voice_category' ? `voice.category.${targetId}` : eventType === 'voice_channel' ? `voice.channel.${targetId}` : eventType;
@@ -286,6 +292,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
       message = 'ログ送信先を設定しました。VCはチャンネル別設定がカテゴリー別設定より優先されます。';
     }
   } else if (commandName === 'sticky') {
+    // ----- 5.5 スティッキー -----
     const channelId = optionString(options, 'channel');
     if (subcommandName === 'remove') {
       const current = (await client.getStickyMessages(guildId)).find((item) => item.channel_id === channelId);
@@ -303,6 +310,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
       message = '固定メッセージを設定しました。メンバーが投稿するたびに最下部へ再投稿します。';
     }
   } else if (commandName === 'role-panel') {
+    // ----- 5.6 ロールパネル -----
     const channelId = optionString(options, 'channel');
     const buttons = [];
     const roleIds: string[] = [];
@@ -316,6 +324,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
     await client.setStarSetting(guildId, `role-panel:${sent.id}`, roleIds);
     message = 'ロールパネルを投稿しました。';
   } else if (commandName === 'game-config') {
+    // ----- 5.7 ゲーム設定 -----
     const current = { ...gameDefaults, ...setting<Record<string, number>>(settings, 'game', gameDefaults) };
     for (const key of Object.keys(gameDefaults) as Array<keyof typeof gameDefaults>) {
       const value = options.get(key);
@@ -324,6 +333,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
     await client.setStarSetting(guildId, 'game', current);
     message = `ゲーム設定を更新しました。メッセージ獲得 ${current.points_per_message}pt / クールダウン ${current.cooldown_seconds}秒 / 日上限 ${current.daily_limit}pt / 抽選 ${current.lottery_cost}pt、当選確率 ${current.lottery_chance}%、追加報酬 ${current.lottery_prize}pt`;
   } else if (commandName === 'omikuji') {
+    // ----- 5.8 おみくじ・ポイント・抽選 -----
     let result: { fortune: string };
     try {
       result = await client.starPoints<{ fortune: string }>('omikuji', { guild_id: guildId, user_id: userId, event_id: eventId });
@@ -353,6 +363,7 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
     }
     message = `${result.won ? `当選！追加で ${game.lottery_prize} pt 獲得しました。` : '今回ははずれです。'} 残高: **${result.balance} pt**`;
   } else if (commandName === 'shop' && subcommandName === 'add') {
+    // ----- 5.9 ショップと購入 -----
     const item: ShopItem = {
       item_id: optionString(options, 'item_id'),
       name: optionString(options, 'name'),
@@ -417,6 +428,7 @@ async function respondKnownGameError(client: GatewayClient, interaction: Interac
   return true;
 }
 
+// ----- 6.1 コンポーネント処理 -----
 async function handleComponent(client: GatewayClient, interaction: InteractionWithRef): Promise<void> {
   const guildId = interaction.guild_id ?? '';
   const userId = interaction.member?.user?.id ?? interaction.user?.id ?? '';
@@ -450,6 +462,7 @@ async function handleComponent(client: GatewayClient, interaction: InteractionWi
   }
 }
 
+// ----- 6.2 スティッキーの移動 -----
 async function moveSticky(client: GatewayClient, sticky: StickyMessage, eventId: string): Promise<{ id: string }> {
   const oldMessageId = sticky.message_id;
   if (oldMessageId) {
@@ -474,6 +487,7 @@ export function resolveVoiceLogChannel(settings: Record<string, unknown>, channe
   return channelOverride || categoryOverride || setting<string>(settings, 'log.voice', '');
 }
 
+// ----- 6.3 メンバーと音声のイベント -----
 async function handleGuildMember(client: GatewayClient, event: EventEnvelope, guildId: string, payload: GuildMemberPayload): Promise<void> {
   const user = payload.user;
   if (!user?.id || user.bot) return;
@@ -544,6 +558,7 @@ async function handleVoiceState(client: GatewayClient, event: EventEnvelope, pay
   await sendMessage(client, logChannel, detail, `${event.event_id}:voice-log`);
 }
 
+// ----- 6.4 イベント振り分け -----
 export async function handleStarEvent(client: GatewayClient, event: EventEnvelope): Promise<void> {
   if (event.event_type === 'INTERACTION_CREATE') {
     const interaction = event.payload as unknown as InteractionWithRef;

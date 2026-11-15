@@ -111,6 +111,8 @@ func (s *Server) serveHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 404, "NOT_FOUND", "endpoint not found")
 	}
 }
+
+// ----- 2.1 認証 -----
 func (s *Server) authenticate(r *http.Request) (authContext, bool) {
 	id := r.Header.Get("X-P1228-Worker-ID")
 	w, ok := s.workers[id]
@@ -167,6 +169,8 @@ func (s *Server) heartbeat(w http.ResponseWriter, r *http.Request, a authContext
 	}
 	writeJSON(w, 200, map[string]any{"success": true, "timestamp": time.Now().UTC()})
 }
+
+// ----- 3.1 イベント受付 -----
 func (s *Server) claim(w http.ResponseWriter, r *http.Request, a authContext) {
 	var req struct {
 		InstanceID string `json:"instance_id"`
@@ -312,6 +316,7 @@ func (s *Server) persistOperationState(id, botID, operation, status, responseRef
 	return s.store.UpdateOperation(ctx, id, botID, operation, status, responseRef, errorMessage)
 }
 
+// ----- 4.1 音声ペイロード -----
 func (s *Server) voicePayload(w http.ResponseWriter, r *http.Request, a authContext) {
 	if a.Worker.Role != "read-aloud" {
 		writeError(w, 403, "FORBIDDEN", "voice gateway access is only allowed for read-aloud workers")
@@ -351,6 +356,8 @@ func (s *Server) interactionAction(w http.ResponseWriter, r *http.Request, a aut
 	}
 	writeJSON(w, 200, map[string]any{"success": true})
 }
+
+// ----- 4.2 設定と辞書 -----
 func (s *Server) settings(w http.ResponseWriter, r *http.Request, a authContext) {
 	if a.Worker.Role != "read-aloud" {
 		writeError(w, 403, "FORBIDDEN", "settings API is only allowed for read-aloud workers")
@@ -456,6 +463,7 @@ func (s *Server) starSettings(w http.ResponseWriter, r *http.Request, a authCont
 	writeJSON(w, 200, map[string]any{"success": true})
 }
 
+// ----- 5.1 ブラックリスト -----
 func (s *Server) starBlacklist(w http.ResponseWriter, r *http.Request, a authContext) {
 	if !s.requireGeneralWorker(w, a) {
 		return
@@ -495,6 +503,7 @@ func (s *Server) starBlacklist(w http.ResponseWriter, r *http.Request, a authCon
 	writeJSON(w, 200, map[string]any{"success": true})
 }
 
+// ----- 5.2 スティッキー -----
 func (s *Server) starSticky(w http.ResponseWriter, r *http.Request, a authContext) {
 	if !s.requireGeneralWorker(w, a) {
 		return
@@ -539,6 +548,7 @@ func (s *Server) starSticky(w http.ResponseWriter, r *http.Request, a authContex
 	writeJSON(w, 200, map[string]any{"success": true})
 }
 
+// ----- 5.3 ポイント -----
 func (s *Server) starPoints(w http.ResponseWriter, r *http.Request, a authContext) {
 	if !s.requireGeneralWorker(w, a) {
 		return
@@ -587,6 +597,7 @@ func (s *Server) starPoints(w http.ResponseWriter, r *http.Request, a authContex
 	writeJSON(w, 200, map[string]any{"success": true, "result": result})
 }
 
+// ----- 5.4 ショップ -----
 func (s *Server) starShop(w http.ResponseWriter, r *http.Request, a authContext) {
 	if !s.requireGeneralWorker(w, a) {
 		return
@@ -682,6 +693,7 @@ func truncate(v string, n int) string {
 	return v
 }
 
+// ----- 6.1 終了処理 -----
 func (s *Server) Shutdown(ctx context.Context) error {
 	if s.httpServer == nil {
 		return nil

@@ -98,6 +98,7 @@ func TestNackMovesEventToDeadLetter(t *testing.T) {
 	}
 }
 
+// ----- 2.1 設定と辞書 -----
 func TestSharedReadAloudSettingsAndDictionary(t *testing.T) {
 	ctx := context.Background()
 	store := testStorage(t)
@@ -153,6 +154,7 @@ func TestLatestWorkerHeartbeatsReturnsNewestPerBot(t *testing.T) {
 	}
 }
 
+// ----- 3.1 Worker登録 -----
 func TestWorkerIdentityAndRetention(t *testing.T) {
 	ctx := context.Background()
 	store := testStorage(t)
@@ -191,6 +193,7 @@ func TestWorkerIdentityAndRetention(t *testing.T) {
 	}
 }
 
+// ----- 3.2 操作と保持 -----
 func TestOperationIDCannotBeReplayed(t *testing.T) {
 	ctx := context.Background()
 	store := testStorage(t)
@@ -285,6 +288,7 @@ func TestStarFeatureSettingsBlacklistAndSticky(t *testing.T) {
 	}
 }
 
+// ----- 4.1 ポイント・抽選・ショップ -----
 func TestPointEarningLotteryShopAndOmikujiAreIdempotent(t *testing.T) {
 	ctx := context.Background()
 	store := testStorage(t)
@@ -424,6 +428,7 @@ func TestLegacyShopInventoryIsBackfilledAsFulfilled(t *testing.T) {
 	}
 }
 
+// ----- 5.1 購入時のエラー -----
 func TestBuyShopItemWithoutPointAccountReportsInsufficientPoints(t *testing.T) {
 	ctx := context.Background()
 	store := testStorage(t)
