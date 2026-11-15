@@ -37,7 +37,21 @@ jobs:
           languages: ${{ matrix.language }}
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
+      # Code scanning (Advanced Security) is only available for Organizations,
+      # so it cannot be enabled on this personal private repository. Uploading
+      # results therefore always failed; save the SARIF as an artifact instead.
+      # If this repo moves to an Organization, drop "upload"/"output" below and
+      # the artifact step, and results will go back to the Security tab.
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: /language:${{ matrix.language }}
+          upload: never
+          output: codeql-results
+      - name: Upload CodeQL results (SARIF artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-sarif-${{ matrix.language }}-${{ github.sha }}
+          path: codeql-results
+          if-no-files-found: error
+          retention-days: 7
