@@ -1,6 +1,4 @@
-# ==================
-# 1. Gatewayサービス
-# ==================
+# ===== 1. Gatewayサービス =====
 [Unit]
 Description=p1228 Go Gateway Proxy
 Wants=network-online.target

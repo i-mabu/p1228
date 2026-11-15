@@ -1,8 +1,8 @@
 # ===== 1. ワークフロー全体設定 =====
 name: Format (auto-fix)
 
-# ===== pull_request イベントでは fork の権限問題があるため対象にしない。 =====
-# ===== main への push と手動実行のときだけ、整形結果を自動コミットする。 =====
+# pull_request イベントでは fork の権限問題があるため対象にしない。
+# main への push と手動実行のときだけ、整形結果を自動コミットする。
 on:
   workflow_dispatch:
   push:

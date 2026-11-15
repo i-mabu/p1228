@@ -30,9 +30,9 @@ export async function runWorker(handler: EventHandler, client = new GatewayClien
   const heartbeatTask = heartbeat();
 
   // ----- 1.2 イベント受付ループ -----
-  // ===== Idle polling backs off from 250ms to 1s while no events arrive, so a =====
-  // ===== quiet Worker does not issue a constant 4 requests/second against the =====
-  // ===== Gateway and SQLite. The delay resets as soon as an event is claimed. =====
+  // Idle polling backs off from 250ms to 1s while no events arrive, so a
+  // quiet Worker does not issue a constant 4 requests/second against the
+  // Gateway and SQLite. The delay resets as soon as an event is claimed.
   let idleDelayMs = 250;
   try {
     while (!abort.signal.aborted) {

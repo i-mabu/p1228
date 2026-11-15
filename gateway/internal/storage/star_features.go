@@ -414,10 +414,10 @@ func (s *Storage) BuyShopItem(ctx context.Context, guildID, userID, itemID, even
 		}
 		return ShopItem{}, PointResult{}, false, err
 	}
-	// ===== A user who has never earned points has no point_accounts row yet. =====
-	// ===== Treat that as a zero balance so the price check below reports =====
-	// ===== "insufficient points" instead of leaking a raw sql.ErrNoRows error =====
-	// ===== (which the Worker misleadingly presented as "item not found"). =====
+	// A user who has never earned points has no point_accounts row yet.
+	// Treat that as a zero balance so the price check below reports
+	// "insufficient points" instead of leaking a raw sql.ErrNoRows error
+	// (which the Worker misleadingly presented as "item not found").
 	var balance int64
 	if err := tx.QueryRowContext(ctx, `SELECT balance FROM point_accounts WHERE guild_id=? AND user_id=?`, guildID, userID).Scan(&balance); err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return ShopItem{}, PointResult{}, false, err
@@ -428,8 +428,8 @@ func (s *Storage) BuyShopItem(ctx context.Context, guildID, userID, itemID, even
 		if roleStatus != "pending" {
 			return item, PointResult{Balance: balance}, false, errors.New("shop item already owned")
 		}
-		// ===== Keep the originally purchased role even if the catalog item was later edited =====
-		// ===== or disabled. A pending fulfillment can be retried without another charge. =====
+		// Keep the originally purchased role even if the catalog item was later edited
+		// or disabled. A pending fulfillment can be retried without another charge.
 		if purchasedRoleID != "" {
 			item.RoleID = purchasedRoleID
 		}
@@ -467,8 +467,8 @@ func (s *Storage) BuyShopItem(ctx context.Context, guildID, userID, itemID, even
 	return item, points, true, tx.Commit()
 }
 
-// CompleteShopRoleGrant ===== is idempotent so a retried Worker event can safely =====
-// ===== finish the purchase after Discord accepted the role assignment. =====
+// CompleteShopRoleGrant is idempotent so a retried Worker event can safely
+// finish the purchase after Discord accepted the role assignment.
 func (s *Storage) CompleteShopRoleGrant(ctx context.Context, guildID, userID, itemID string) error {
 	if guildID == "" || userID == "" || itemID == "" {
 		return errors.New("guild_id, user_id and item_id are required")

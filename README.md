@@ -69,7 +69,7 @@ Voice関連依存はバージョン固定です。更新時はCustom AdapterとD
 
 ```powershell
 Copy-Item .env.example .env
-# ===== .env を編集 =====
+# .env を編集
 Set-ExecutionPolicy -Scope Process Bypass
 .\deploy\windows\start.ps1
 ```

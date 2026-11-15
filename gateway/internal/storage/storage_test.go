@@ -435,9 +435,9 @@ func TestBuyShopItemWithoutPointAccountReportsInsufficientPoints(t *testing.T) {
 	if err := store.UpsertShopItem(ctx, "guild-1", ShopItem{ItemID: "color", Name: "Color", Price: 10, RoleID: "role-1"}); err != nil {
 		t.Fatal(err)
 	}
-	// ===== The buyer has never earned points, so no point_accounts row exists. =====
-	// ===== The purchase must fail with "insufficient points", not a raw =====
-	// ===== sql.ErrNoRows that the Worker presented as "item not found". =====
+	// The buyer has never earned points, so no point_accounts row exists.
+	// The purchase must fail with "insufficient points", not a raw
+	// sql.ErrNoRows that the Worker presented as "item not found".
 	_, _, _, err := store.BuyShopItem(ctx, "guild-1", "user-new", "color", "interaction-buy-new-user")
 	if err == nil || err.Error() != "insufficient points" {
 		t.Fatalf("buy without point account err=%v, want insufficient points", err)

@@ -119,8 +119,8 @@ func (s *Storage) PruneExpiredEvents(ctx context.Context, retentionHours int) (i
 		return 0, err
 	}
 	defer tx.Rollback()
-	// ===== Events that never reached ACK by the payload-retention deadline are dead-lettered =====
-	// ===== without preserving message bodies indefinitely. The audit record remains, payload is scrubbed. =====
+	// Events that never reached ACK by the payload-retention deadline are dead-lettered
+	// without preserving message bodies indefinitely. The audit record remains, payload is scrubbed.
 	if _, err = tx.ExecContext(ctx, `INSERT OR IGNORE INTO event_dead_letters(event_id,bot_id,event_type,reason,attempts,payload_json,created_at) SELECT event_id,bot_id,event_type,'event expired before processing/ACK by payload retention policy',attempts,payload_json,received_at FROM event_inbox WHERE received_at < ? AND status IN ('pending','processing')`, cutoff); err != nil {
 		return 0, err
 	}
@@ -197,12 +197,12 @@ func randomID(prefix string) string {
 	return prefix + hex.EncodeToString(b[:])
 }
 
-// ===== Fixed-width UTC timestamps sort lexicographically in the same order as time. =====
+// Fixed-width UTC timestamps sort lexicographically in the same order as time.
 func formatTime(value time.Time) string { return value.UTC().Format("2006-01-02T15:04:05.000000000Z") }
 func now() string                       { return formatTime(time.Now()) }
 
 // ===== 3. イベント受付とセッション =====
-// RecordDispatch ===== commits the inbox record and sequence checkpoint atomically. =====
+// RecordDispatch commits the inbox record and sequence checkpoint atomically.
 func (s *Storage) RecordDispatch(ctx context.Context, sess Session, ev *Event) error {
 	s.writeMu.Lock()
 	defer s.writeMu.Unlock()
@@ -353,8 +353,8 @@ func (s *Storage) IsWorkerRegistered(ctx context.Context, instanceID, workerID, 
 
 // ----- 4.1 ハートビート -----
 func (s *Storage) Heartbeat(ctx context.Context, instanceID, workerID, botID string) error {
-	// ===== Take the same write lock as every other mutating method so heartbeat =====
-	// ===== updates stay serialized with registrations and event claims. =====
+	// Take the same write lock as every other mutating method so heartbeat
+	// updates stay serialized with registrations and event claims.
 	s.writeMu.Lock()
 	defer s.writeMu.Unlock()
 	res, err := s.db.ExecContext(ctx, `UPDATE worker_instances SET last_heartbeat=?,status='online' WHERE instance_id=? AND worker_id=? AND bot_id=?`, now(), instanceID, workerID, botID)
@@ -368,9 +368,9 @@ func (s *Storage) Heartbeat(ctx context.Context, instanceID, workerID, botID str
 	return nil
 }
 
-// LatestWorkerHeartbeats ===== returns the most recent heartbeat for each bot. =====
-// ===== Multiple instances of a worker are tolerated; the newest one represents =====
-// ===== the bot's liveness. =====
+// LatestWorkerHeartbeats returns the most recent heartbeat for each bot.
+// Multiple instances of a worker are tolerated; the newest one represents
+// the bot's liveness.
 func (s *Storage) LatestWorkerHeartbeats(ctx context.Context) (map[string]time.Time, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT bot_id, MAX(last_heartbeat) FROM worker_instances WHERE status='online' GROUP BY bot_id`)
 	if err != nil {
@@ -393,8 +393,8 @@ func (s *Storage) LatestWorkerHeartbeats(ctx context.Context) (map[string]time.T
 }
 
 // ===== 5. 操作の冪等性管理 =====
-// CreateOperation ===== reserves operation_id exactly once before any external side effect. =====
-// ===== A duplicate request is rejected rather than replayed because a timeout may have an unknown outcome. =====
+// CreateOperation reserves operation_id exactly once before any external side effect.
+// A duplicate request is rejected rather than replayed because a timeout may have an unknown outcome.
 func (s *Storage) CreateOperation(ctx context.Context, id, botID, operation string) (bool, error) {
 	s.writeMu.Lock()
 	defer s.writeMu.Unlock()

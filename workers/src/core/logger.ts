@@ -3,8 +3,8 @@ const secretKeys = /token|secret|authorization|password|content|message_body/i;
 
 function sanitize(value: unknown, key = ''): unknown {
   if (secretKeys.test(key)) return '[REDACTED]';
-  // ===== Keep the key context: an array stored under a sensitive key (e.g. =====
-  // ===== "tokens": [...]) must have its elements redacted too. =====
+  // Keep the key context: an array stored under a sensitive key (e.g.
+  // "tokens": [...]) must have its elements redacted too.
   if (Array.isArray(value)) return value.map((item) => sanitize(item, key));
   if (value && typeof value === 'object') {
     return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, sanitize(v, k)]));

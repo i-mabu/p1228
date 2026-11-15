@@ -23,7 +23,7 @@ run_one() {
   }
   unset P1228_GATEWAY_URL P1228_WORKER_ID P1228_BOT_ID P1228_WORKER_SECRET P1228_APPLICATION_ID
   set -a
-  # ===== These root-owned env files contain only controlled KEY=value entries. =====
+  # These root-owned env files contain only controlled KEY=value entries.
   # shellcheck disable=SC1090
   source "$file"
   set +a

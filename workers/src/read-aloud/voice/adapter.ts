@@ -9,9 +9,9 @@ const MAX_OUTBOUND_QUEUE = 100;
 type VoicePayload = { op: number; d: Record<string, unknown> };
 
 // ===== 2. 音声アダプタ =====
-/** ===== Custom Adapter boundary for p1228. =====
- * ===== sendPayload is synchronous by design: it only appends to a bounded in-memory queue. =====
- * ===== The async dispatcher transfers opcode 4 to Go; HTTP is never awaited by sendPayload. =====
+/** Custom Adapter boundary for p1228.
+ * sendPayload is synchronous by design: it only appends to a bounded in-memory queue.
+ * The async dispatcher transfers opcode 4 to Go; HTTP is never awaited by sendPayload.
  */
 export class P1228VoiceAdapter {
   private readonly queue: VoicePayload[] = [];
@@ -93,7 +93,7 @@ export class P1228VoiceAdapter {
             guild_id: this.guildId,
             error: error instanceof Error ? error.message : String(error),
           });
-          // ===== Do not replay an already ambiguous opcode 4 automatically. Disconnect the adapter instead. =====
+          // Do not replay an already ambiguous opcode 4 automatically. Disconnect the adapter instead.
           this.fail();
           break;
         }

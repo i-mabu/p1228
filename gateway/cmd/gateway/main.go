@@ -52,8 +52,8 @@ func run() error {
 	}
 
 	manager := discord.NewManager(cfg, store, log)
-	// ===== server.New re-indexes workers by worker_id, so the config map can be =====
-	// ===== passed directly instead of copying it entry by entry. =====
+	// server.New re-indexes workers by worker_id, so the config map can be
+	// passed directly instead of copying it entry by entry.
 	api := server.New(cfg, store, manager, cfg.Workers, log)
 
 	// ----- 2.2 終了シグナルと定期クリーンアップ -----

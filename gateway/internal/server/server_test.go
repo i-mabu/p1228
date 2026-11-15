@@ -10,7 +10,7 @@ import (
 )
 
 // ===== 1. テスト用ヘルパー =====
-// ===== Built by repetition so the fixture stays obviously fake. =====
+// Built by repetition so the fixture stays obviously fake.
 var testWorkerSecret = strings.Repeat("test-secret-", 3)
 
 func testServer() *Server {

@@ -21,9 +21,9 @@ const commands =
       ];
 
 // ===== 2. アプリケーションIDの解決 =====
-// ===== 配置スクリプト経由では Worker ごとに統一された P1228_APPLICATION_ID が渡るが、 =====
-// ===== 直接実行時（.env を利用した npm run sync:commands）では BOT ごとの変数だけが存在する。 =====
-// ===== 両方に対応して、直接実行時の失敗を防ぐ。 =====
+// 配置スクリプト経由では Worker ごとに統一された P1228_APPLICATION_ID が渡るが、
+// 直接実行時（.env を利用した npm run sync:commands）では BOT ごとの変数だけが存在する。
+// 両方に対応して、直接実行時の失敗を防ぐ。
 const perBotApplicationIdEnv: Record<BotId, string> = {
   general: 'P1228_GENERAL_APPLICATION_ID',
   read_aloud_a: 'P1228_READ_ALOUD_A_APPLICATION_ID',

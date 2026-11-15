@@ -9,7 +9,7 @@ export interface SynthesisOptions {
   speakerId: number;
   speed: number;
   volume: number;
-  /** ===== Settings and dictionary revisions prevent stale speech from being reused. ===== */
+  /** Settings and dictionary revisions prevent stale speech from being reused. */
   cacheRevision: string;
 }
 
@@ -63,7 +63,7 @@ export class AudioEngineClient {
     const audio = Buffer.from(await synthesisResponse.arrayBuffer());
     if (!isWav(audio)) throw new Error('Audio engine returned an empty or invalid WAV payload');
 
-    // ===== Large one-off files are returned but not cached. The cache is temporary and bounded. =====
+    // Large one-off files are returned but not cached. The cache is temporary and bounded.
     if (audio.byteLength <= this.maxCacheBytes) {
       await this.writeCache(cachePath, audio).catch(() => undefined);
     }
@@ -115,7 +115,7 @@ export class AudioEngineClient {
         const info = await stat(path);
         if (info.isFile()) files.push({ path, size: info.size, modifiedAt: info.mtimeMs });
       } catch {
-        /* ===== Concurrent cleanup or file replacement. ===== */
+        /* Concurrent cleanup or file replacement. */
       }
     }
     const now = Date.now();

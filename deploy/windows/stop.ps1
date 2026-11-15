@@ -60,4 +60,4 @@ if ($remainingPidFiles.Count -gt 0) {
   exit 1
 }
 
-# ===== Runtime logs stay in .runtime/; there is no remote log archive anymore. =====
+# Runtime logs stay in .runtime/; there is no remote log archive anymore.

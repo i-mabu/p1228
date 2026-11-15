@@ -43,9 +43,9 @@ func (s *InteractionStore) Create(botID, interactionID, token, applicationID str
 	ref := randomToken("ix_")
 	now := time.Now()
 	s.mu.Lock()
-	// ===== Expired refs are also rejected lazily on use, so sweeping the whole =====
-	// ===== map on every Create (O(n) per interaction) is wasteful. Sweep at =====
-	// ===== most once a minute, or sooner if the map grows unexpectedly large. =====
+	// Expired refs are also rejected lazily on use, so sweeping the whole
+	// map on every Create (O(n) per interaction) is wasteful. Sweep at
+	// most once a minute, or sooner if the map grows unexpectedly large.
 	if len(s.refs) > 1024 || now.Sub(s.lastSweep) > time.Minute {
 		s.lastSweep = now
 		for key, value := range s.refs {
@@ -60,8 +60,8 @@ func (s *InteractionStore) Create(botID, interactionID, token, applicationID str
 }
 
 // ===== 2. 応答と遅延処理 =====
-// AutoDefer ===== claims the one-shot initial response only if the Worker has not replied. =====
-// ===== Application commands and modal submits use type 5; components use type 6. =====
+// AutoDefer claims the one-shot initial response only if the Worker has not replied.
+// Application commands and modal submits use type 5; components use type 6.
 func (s *InteractionStore) AutoDefer(ctx context.Context, expectedBotID, ref string, responseType int) error {
 	s.mu.Lock()
 	current, ok := s.refs[ref]
@@ -82,8 +82,8 @@ func (s *InteractionStore) AutoDefer(ctx context.Context, expectedBotID, ref str
 	if current.InitialPending {
 		current.InitialPending = false
 		if err != nil {
-			// ===== A transport failure may mean Discord accepted the callback but its response =====
-			// ===== was lost. Never issue another initial callback or a follow-up in that state. =====
+			// A transport failure may mean Discord accepted the callback but its response
+			// was lost. Never issue another initial callback or a follow-up in that state.
 			current.InitialUnknown = true
 		} else {
 			current.InitialSent = true
@@ -120,8 +120,8 @@ func (s *InteractionStore) Do(ctx context.Context, expectedBotID, ref, action st
 	case "initial":
 		if current.InitialSent {
 			if current.AutoResponseType == 6 {
-				// ===== A deferred component update already acknowledges the click. A repeated =====
-				// ===== type-6 response is redundant; a late message response becomes a follow-up. =====
+				// A deferred component update already acknowledges the click. A repeated
+				// type-6 response is redundant; a late message response becomes a follow-up.
 				var callback struct {
 					Type int `json:"type"`
 				}
@@ -134,8 +134,8 @@ func (s *InteractionStore) Do(ctx context.Context, expectedBotID, ref, action st
 				requestBody = unwrapInitialCallback(body)
 				consumeAutoDefer = true
 			} else if current.AutoResponseType == 8 {
-				// ===== The empty autocomplete fallback is already the final initial response. =====
-				// ===== Autocomplete cannot be edited or deferred after type 8. =====
+				// The empty autocomplete fallback is already the final initial response.
+				// Autocomplete cannot be edited or deferred after type 8.
 				current.AutoResponseType = 0
 				s.mu.Unlock()
 				return nil
@@ -144,8 +144,8 @@ func (s *InteractionStore) Do(ctx context.Context, expectedBotID, ref, action st
 					s.mu.Unlock()
 					return errors.New("interaction already acknowledged")
 				}
-				// ===== The Gateway already sent a defer after the safety deadline. Treat this late =====
-				// ===== initial response as the edit of the deferred original response. =====
+				// The Gateway already sent a defer after the safety deadline. Treat this late
+				// initial response as the edit of the deferred original response.
 				consumeAutoDefer = true
 				method = http.MethodPatch
 				path = originalResponsePath(&value)
@@ -210,7 +210,7 @@ func (s *InteractionStore) request(ctx context.Context, method, path string, bod
 			return err
 		}
 		req.Header.Set("Content-Type", "application/json")
-		// ===== Interaction endpoints are authenticated by the short-lived interaction token in the URL. =====
+		// Interaction endpoints are authenticated by the short-lived interaction token in the URL.
 		resp, err := s.client.Do(req)
 		if err != nil {
 			last = err

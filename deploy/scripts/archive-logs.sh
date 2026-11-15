@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# ===== Local-only journal archive. No remote upload: archives stay on local disk =====
-# ===== under ARCHIVE_DIR and are pruned after RETENTION_DAYS. =====
+# Local-only journal archive. No remote upload: archives stay on local disk
+# under ARCHIVE_DIR and are pruned after RETENTION_DAYS.
 # ===== 1. 設定と前提確認 =====
 ARCHIVE_DIR="${P1228_LOG_ARCHIVE_DIR:-/var/spool/p1228/archive/logs}"
 RETENTION_DAYS="${P1228_LOG_ARCHIVE_RETENTION_DAYS:-90}"
@@ -11,7 +11,7 @@ command -v journalctl >/dev/null
 command -v gzip >/dev/null
 
 # ===== 2. アーカイブ検証 =====
-# ===== Verify a local archive is a readable gzip file and report its size/hash. =====
+# Verify a local archive is a readable gzip file and report its size/hash.
 archive_one() {
   local file="$1" base service day local_size local_sha
   base="$(basename "$file")"
@@ -35,7 +35,7 @@ archive_one() {
 }
 
 # ===== 3. アーカイブ生成 =====
-# ===== Generate previous UTC day's journal archives. =====
+# Generate previous UTC day's journal archives.
 DAY="$(date -u -d 'yesterday' +%F)"
 UNITS=(system p1228-gateway p1228-general p1228-read-aloud-a p1228-read-aloud-b p1228-db-backup p1228-log-archive p1228-storage-monitor)
 for unit in "${UNITS[@]}"; do
@@ -52,6 +52,6 @@ for unit in "${UNITS[@]}"; do
 done
 
 # ===== 4. 保持期間の整理 =====
-# ===== Prune archives older than the retention period. Local disk only; nothing =====
-# ===== is uploaded or deleted elsewhere. =====
+# Prune archives older than the retention period. Local disk only; nothing
+# is uploaded or deleted elsewhere.
 find "$ARCHIVE_DIR" -maxdepth 1 -type f -name '*.jsonl.gz' -mtime "+$RETENTION_DAYS" -print -delete

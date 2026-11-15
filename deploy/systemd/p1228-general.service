@@ -1,6 +1,4 @@
-# =====================
-# 1. 汎用Workerサービス
-# =====================
+# ===== 1. 汎用Workerサービス =====
 [Unit]
 Description=p1228 星燈 General Worker
 Wants=network-online.target p1228-gateway.service

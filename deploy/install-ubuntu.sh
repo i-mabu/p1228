@@ -98,7 +98,7 @@ P1228_DB_PATH=/var/lib/p1228/database/p1228.db
 P1228_DB_BACKUP_DIR=/var/backups/p1228/sqlite
 P1228_ALERT_WEBHOOK_URL=
 ENV
-# ===== systemd (PID 1) reads EnvironmentFile before dropping privileges. Keep all secrets root-only. =====
+# systemd (PID 1) reads EnvironmentFile before dropping privileges. Keep all secrets root-only.
 chown root:root /etc/p1228/*.env
 chmod 0600 /etc/p1228/*.env
 

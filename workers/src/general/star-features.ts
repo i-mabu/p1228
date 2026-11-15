@@ -390,8 +390,8 @@ async function respondToCommand(client: GatewayClient, interaction: InteractionW
       message = `「${purchase.item.name}」は購入済みで、ロール付与も完了しています。残高: **${purchase.balance} pt**`;
     } else {
       try {
-        // ===== Discord's add-role endpoint is an idempotent PUT. Re-running /buy for =====
-        // ===== a pending inventory item retries fulfillment without charging again. =====
+        // Discord's add-role endpoint is an idempotent PUT. Re-running /buy for
+        // a pending inventory item retries fulfillment without charging again.
         await client.addRole(guildId, userId, purchase.item.role_id, `${eventId}:shop-role`);
         await client.completeShopItem(guildId, userId, itemId);
         message = `「${purchase.item.name}」のロールを付与しました。残高: **${purchase.balance} pt**`;

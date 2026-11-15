@@ -2,9 +2,9 @@
 set -Eeuo pipefail
 
 # ===== 1. 概要と引数確認 =====
-# ===== Restore a local SQLite backup created by backup-sqlite.sh. =====
-# ===== The manifest (<backup>.json) next to the backup file provides the =====
-# ===== expected SHA-256. Nothing is downloaded from a remote store. =====
+# Restore a local SQLite backup created by backup-sqlite.sh.
+# The manifest (<backup>.json) next to the backup file provides the
+# expected SHA-256. Nothing is downloaded from a remote store.
 if [[ $# -ne 2 ]]; then
   echo "Usage: $0 <local backup db path, e.g. /var/backups/p1228/sqlite/p1228-....db> <new local target path>" >&2
   exit 2

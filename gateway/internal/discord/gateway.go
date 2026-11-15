@@ -30,8 +30,8 @@ type Manager struct {
 	store        *storage.Storage
 	log          *slog.Logger
 	interactions *InteractionStore
-	// ===== Shared HTTP client: creating a client per REST call discards =====
-	// ===== keep-alive connections and repeats the TLS handshake every time. =====
+	// Shared HTTP client: creating a client per REST call discards
+	// keep-alive connections and repeats the TLS handshake every time.
 	httpClient   *http.Client
 	mu           sync.RWMutex
 	connections  map[string]*wsConnection
@@ -96,10 +96,10 @@ func (m *Manager) runBot(ctx context.Context, botID string) {
 		case <-ctx.Done():
 			return
 		}
-		// ===== A connection that stayed up for a long time was healthy; do not =====
-		// ===== keep punishing its reconnect with the maximum backoff. Otherwise =====
-		// ===== double the backoff, capped at 60s (the previous check let it =====
-		// ===== overshoot to 64s). =====
+		// A connection that stayed up for a long time was healthy; do not
+		// keep punishing its reconnect with the maximum backoff. Otherwise
+		// double the backoff, capped at 60s (the previous check let it
+		// overshoot to 64s).
 		if time.Since(started) > 5*time.Minute {
 			backoff = 2 * time.Second
 		} else {
@@ -353,8 +353,8 @@ func (m *Manager) checkWorkerHeartbeats(ctx context.Context) {
 	now := time.Now()
 	for _, worker := range m.cfg.Workers {
 		last, ok := heartbeats[worker.BotID]
-		// ===== Allow a bounded startup/provisioning window, then report a configured =====
-		// ===== Worker that never registered instead of leaving its presence healthy forever. =====
+		// Allow a bounded startup/provisioning window, then report a configured
+		// Worker that never registered instead of leaving its presence healthy forever.
 		if !ok {
 			if workerMissingAfterStartupGrace(m.startedAt, now) {
 				m.setWorkerFailure(worker.BotID, true, time.Time{})
@@ -485,8 +485,8 @@ func (m *Manager) handleDispatch(ctx context.Context, botID string, p gatewayPay
 			delete(d, "token")
 		}
 		if botID == "general" && p.T == "VOICE_STATE_UPDATE" {
-			// ===== The general Worker only needs channel transitions for logging. Keep Voice =====
-			// ===== session identifiers in the existing short-lived read-aloud path. =====
+			// The general Worker only needs channel transitions for logging. Keep Voice
+			// session identifiers in the existing short-lived read-aloud path.
 			delete(d, "session_id")
 		}
 		payload, err := json.Marshal(d)
@@ -498,10 +498,10 @@ func (m *Manager) handleDispatch(ctx context.Context, botID string, p gatewayPay
 			sid = "no-session"
 		}
 		h := sha256.Sum256([]byte(sid))
-		// ===== 8 bytes (64 bits) of the session hash: with only 4 bytes, two =====
-		// ===== different sessions could collide by birthday bound (~65k sessions) =====
-		// ===== while their sequence numbers overlap, and the duplicate event_id =====
-		// ===== primary key would silently drop a real event (INSERT OR IGNORE). =====
+		// 8 bytes (64 bits) of the session hash: with only 4 bytes, two
+		// different sessions could collide by birthday bound (~65k sessions)
+		// while their sequence numbers overlap, and the duplicate event_id
+		// primary key would silently drop a real event (INSERT OR IGNORE).
 		eventID := fmt.Sprintf("%s_%s_%d", botID, hex.EncodeToString(h[:8]), *p.S)
 		guildID := stringField(d, "guild_id")
 		channelID := stringField(d, "channel_id")
@@ -518,8 +518,8 @@ func (m *Manager) handleDispatch(ctx context.Context, botID string, p gatewayPay
 		return err
 	}
 	if (botID == "read_aloud_a" || botID == "read_aloud_b") && (p.T == "VOICE_SERVER_UPDATE" || p.T == "VOICE_STATE_UPDATE") {
-		// ===== The adapter only needs this BOT's own voice-state updates. Filtering unrelated =====
-		// ===== guild-member state changes keeps the short-lived in-memory queue bounded. =====
+		// The adapter only needs this BOT's own voice-state updates. Filtering unrelated
+		// guild-member state changes keeps the short-lived in-memory queue bounded.
 
 		// ----- 4.3 音声状態イベント -----
 		if p.T == "VOICE_STATE_UPDATE" && stringField(d, "user_id") != sess.BotUserID {
@@ -551,7 +551,7 @@ func shouldQueue(botID, t string) bool {
 func stringField(m map[string]any, k string) string { v, _ := m[k].(string); return v }
 
 // ===== 5. 音声イベントとREST連携 =====
-// ClaimVoiceEvent ===== returns short-lived Voice Server Update data from memory only. =====
+// ClaimVoiceEvent returns short-lived Voice Server Update data from memory only.
 func (m *Manager) ClaimVoiceEvent(botID string) *storage.Event {
 	ch := m.voiceEvents[botID]
 	if ch == nil {
@@ -560,8 +560,8 @@ func (m *Manager) ClaimVoiceEvent(botID string) *storage.Event {
 	for {
 		select {
 		case ev := <-ch:
-			// ===== Voice Server tokens and Voice session state are short-lived transport data. =====
-			// ===== Never deliver stale queue entries after a reconnect or worker stall. =====
+			// Voice Server tokens and Voice session state are short-lived transport data.
+			// Never deliver stale queue entries after a reconnect or worker stall.
 			occurred, err := time.Parse(time.RFC3339Nano, ev.OccurredAt)
 			if err != nil || time.Since(occurred) > 30*time.Second {
 				m.log.Warn("stale ephemeral voice event dropped", "bot_id", botID, "event_type", ev.EventType)

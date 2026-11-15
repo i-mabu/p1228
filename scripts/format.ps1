@@ -42,9 +42,9 @@ if (Get-Command shfmt -ErrorAction SilentlyContinue) {
 }
 
 # ===== 5. PowerShellの整形（Invoke-Formatter、手動適用） =====
-# ===== PowerShell スクリプトの整形は一括自動適用せず、PSScriptAnalyzer の =====
-# ===== Invoke-Formatter で内容を確認してから手動で適用する運用とする。 =====
-# ===== 例: Invoke-Formatter -ScriptDefinition (Get-Content -Raw deploy/windows/start.ps1) =====
+# PowerShell スクリプトの整形は一括自動適用せず、PSScriptAnalyzer の
+# Invoke-Formatter で内容を確認してから手動で適用する運用とする。
+# 例: Invoke-Formatter -ScriptDefinition (Get-Content -Raw deploy/windows/start.ps1)
 if (Get-Module -ListAvailable PSScriptAnalyzer) {
   Write-Host 'PSScriptAnalyzer found. To preview PowerShell formatting, run Invoke-Formatter per file (see docs/operations/ci.md).'
 } else {

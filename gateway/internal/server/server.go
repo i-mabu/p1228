@@ -127,9 +127,9 @@ func (s *Server) authenticate(r *http.Request) (authContext, bool) {
 	if a == "" {
 		return authContext{}, false
 	}
-	// ===== Compare fixed-length digests: comparing the raw secrets with =====
-	// ===== ConstantTimeCompare returns early when lengths differ, which would =====
-	// ===== leak the configured secret's length through timing. =====
+	// Compare fixed-length digests: comparing the raw secrets with
+	// ConstantTimeCompare returns early when lengths differ, which would
+	// leak the configured secret's length through timing.
 	presented := sha256.Sum256([]byte(a))
 	expected := sha256.Sum256([]byte(w.Secret))
 	if subtle.ConstantTimeCompare(presented[:], expected[:]) != 1 {
@@ -684,8 +684,8 @@ func methodNotAllowed(w http.ResponseWriter) {
 	writeError(w, 405, "METHOD_NOT_ALLOWED", "method not allowed")
 }
 func truncate(v string, n int) string {
-	// ===== Cut on a rune boundary so persisted error text stays valid UTF-8 =====
-	// ===== even when the reason contains multi-byte characters. =====
+	// Cut on a rune boundary so persisted error text stays valid UTF-8
+	// even when the reason contains multi-byte characters.
 	for len(v) > n {
 		_, size := utf8.DecodeLastRuneInString(v)
 		v = v[:len(v)-size]

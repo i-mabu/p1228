@@ -5,7 +5,7 @@ gateway:
   event_lease_seconds: 30
   max_event_attempts: 8
   interaction_ttl_seconds: 900
-  # ===== Provisional privacy default. Confirm G-11 before production deployment. =====
+  # Provisional privacy default. Confirm G-11 before production deployment.
   event_payload_retention_hours: 24
 
 # ===== 2. BOT定義 =====
@@ -15,15 +15,15 @@ bots:
     watching: "サーバーを見守り中"
     application_id: "${P1228_GENERAL_APPLICATION_ID}"
     token_env: "P1228_GENERAL_BOT_TOKEN"
-    # ===== GUILDS | GUILD_MEMBERS | GUILD_VOICE_STATES | GUILD_MESSAGES | MESSAGE_CONTENT =====
-    # ===== GUILD_MEMBERS and MESSAGE_CONTENT are privileged intents in the Developer Portal. =====
+    # GUILDS | GUILD_MEMBERS | GUILD_VOICE_STATES | GUILD_MESSAGES | MESSAGE_CONTENT
+    # GUILD_MEMBERS and MESSAGE_CONTENT are privileged intents in the Developer Portal.
     intents: 33411
   read_aloud_a:
     display_name: "言ノ葉"
     watching: "言葉を紡ぎ中"
     application_id: "${P1228_READ_ALOUD_A_APPLICATION_ID}"
     token_env: "P1228_READ_ALOUD_A_BOT_TOKEN"
-    # ===== GUILDS | GUILD_MEMBERS | GUILD_VOICE_STATES | GUILD_MESSAGES | MESSAGE_CONTENT =====
+    # GUILDS | GUILD_MEMBERS | GUILD_VOICE_STATES | GUILD_MESSAGES | MESSAGE_CONTENT
     intents: 33409
   read_aloud_b:
     display_name: "紡言"
