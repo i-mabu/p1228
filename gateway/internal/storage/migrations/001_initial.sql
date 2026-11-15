@@ -1,3 +1,4 @@
+-- ===== 1. 基盤テーブル =====
 CREATE TABLE IF NOT EXISTS schema_migrations (
     version INTEGER PRIMARY KEY,
     applied_at TEXT NOT NULL
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS user_settings (
     updated_at TEXT NOT NULL
 );
 
+-- ===== 2. 辞書と音声エンジン設定 =====
 CREATE TABLE IF NOT EXISTS dictionaries (
     dictionary_id TEXT PRIMARY KEY,
     scope TEXT NOT NULL,
@@ -54,6 +56,7 @@ CREATE TABLE IF NOT EXISTS audio_engine_settings (
     updated_at TEXT NOT NULL
 );
 
+-- ===== 3. イベント基盤テーブル =====
 CREATE TABLE IF NOT EXISTS event_idempotency_keys (
     handler_key TEXT NOT NULL,
     idempotency_key TEXT NOT NULL,
@@ -127,6 +130,7 @@ CREATE TABLE IF NOT EXISTS discord_operations (
     updated_at TEXT NOT NULL
 );
 
+-- ===== 4. 読み上げ設定と監査ログ =====
 CREATE TABLE IF NOT EXISTS read_aloud_settings (
     scope TEXT NOT NULL,
     scope_id TEXT NOT NULL,

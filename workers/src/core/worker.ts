@@ -3,6 +3,7 @@ import { GatewayClient } from './client.js';
 import { logger } from './logger.js';
 import type { EventEnvelope } from './types.js';
 
+// ===== 1. イベントハンドラ型とWorker実行ループ =====
 export type EventHandler = (event: EventEnvelope, client: GatewayClient) => Promise<void>;
 
 export async function runWorker(handler: EventHandler, client = new GatewayClient()): Promise<void> {
@@ -17,22 +18,26 @@ export async function runWorker(handler: EventHandler, client = new GatewayClien
 
   const heartbeat = async () => {
     while (!abort.signal.aborted) {
-      try { await client.heartbeat(); }
-      catch (error) { logger.warn('worker_heartbeat_failed', { error: errorMessage(error) }); }
+      try {
+        await client.heartbeat();
+      } catch (error) {
+        logger.warn('worker_heartbeat_failed', { error: errorMessage(error) });
+      }
       await delay(10_000, undefined, { signal: abort.signal }).catch(() => undefined);
     }
   };
   const heartbeatTask = heartbeat();
 
-  // Idle polling backs off from 250ms to 1s while no events arrive, so a
-  // quiet Worker does not issue a constant 4 requests/second against the
-  // Gateway and SQLite. The delay resets as soon as an event is claimed.
+  // ===== Idle polling backs off from 250ms to 1s while no events arrive, so a =====
+  // ===== quiet Worker does not issue a constant 4 requests/second against the =====
+  // ===== Gateway and SQLite. The delay resets as soon as an event is claimed. =====
   let idleDelayMs = 250;
   try {
     while (!abort.signal.aborted) {
       let event: EventEnvelope | null = null;
-      try { event = await client.claim(); }
-      catch (error) {
+      try {
+        event = await client.claim();
+      } catch (error) {
         logger.warn('event_claim_failed', { error: errorMessage(error) });
         await delay(1_000, undefined, { signal: abort.signal }).catch(() => undefined);
         continue;
@@ -49,8 +54,11 @@ export async function runWorker(handler: EventHandler, client = new GatewayClien
       } catch (error) {
         logger.error('event_processing_failed', { event_id: event.event_id, event_type: event.event_type, error: errorMessage(error) });
         if (!event.ephemeral) {
-          try { await client.nack(event, errorMessage(error)); }
-          catch (nackError) { logger.error('event_nack_failed', { event_id: event.event_id, error: errorMessage(nackError) }); }
+          try {
+            await client.nack(event, errorMessage(error));
+          } catch (nackError) {
+            logger.error('event_nack_failed', { event_id: event.event_id, error: errorMessage(nackError) });
+          }
         }
       }
     }
@@ -61,6 +69,7 @@ export async function runWorker(handler: EventHandler, client = new GatewayClien
   }
 }
 
+// ===== 2. Gateway接続待ち =====
 async function waitForGateway(client: GatewayClient, signal: AbortSignal): Promise<void> {
   let backoff = 1_000;
   while (!signal.aborted) {
@@ -77,6 +86,7 @@ async function waitForGateway(client: GatewayClient, signal: AbortSignal): Promi
   throw new Error('Worker start aborted before Gateway became ready');
 }
 
+// ===== 3. エラーユーティリティ =====
 export function errorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return String(error);

@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// ===== 1. ロガーの生成 =====
 func New(level, format string) *slog.Logger {
 	var l slog.Level
 	switch strings.ToLower(level) {

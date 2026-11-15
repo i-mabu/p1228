@@ -1,3 +1,6 @@
+# =================================
+# 1. 読み上げWorkerサービス（紡言）
+# =================================
 [Unit]
 Description=p1228 紡言 Read-aloud Worker
 Wants=network-online.target p1228-gateway.service

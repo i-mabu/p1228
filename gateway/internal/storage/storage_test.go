@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// ===== 1. テスト用ヘルパー =====
 func testStorage(t *testing.T) *Storage {
 	t.Helper()
 	store, err := Open(filepath.Join(t.TempDir(), "p1228.db"))
@@ -32,6 +33,7 @@ func makeEvent(botID, eventID, ordering string, seq int64) *Event {
 		OrderingKey: ordering, SessionID: "session-1", Sequence: seq, Payload: payload}
 }
 
+// ===== 2. イベントと設定の検証テスト =====
 func TestRecordClaimAckAndOrdering(t *testing.T) {
 	ctx := context.Background()
 	store := testStorage(t)
@@ -121,6 +123,7 @@ func TestSharedReadAloudSettingsAndDictionary(t *testing.T) {
 	}
 }
 
+// ===== 3. Worker・操作・保持の検証テスト =====
 func TestLatestWorkerHeartbeatsReturnsNewestPerBot(t *testing.T) {
 	ctx := context.Background()
 	store := testStorage(t)
@@ -230,6 +233,7 @@ func TestRetentionDeadLettersExpiredUnackedPayload(t *testing.T) {
 	}
 }
 
+// ===== 4. 星燈機能の検証テスト =====
 func TestStarFeatureSettingsBlacklistAndSticky(t *testing.T) {
 	ctx := context.Background()
 	store := testStorage(t)
@@ -343,6 +347,7 @@ func TestPointEarningLotteryShopAndOmikujiAreIdempotent(t *testing.T) {
 	}
 }
 
+// ===== 5. ショップ移行と購入の検証テスト =====
 func TestShopFulfillmentMigrationIsIdempotent(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "p1228.db")
 	first, err := Open(path)
@@ -425,9 +430,9 @@ func TestBuyShopItemWithoutPointAccountReportsInsufficientPoints(t *testing.T) {
 	if err := store.UpsertShopItem(ctx, "guild-1", ShopItem{ItemID: "color", Name: "Color", Price: 10, RoleID: "role-1"}); err != nil {
 		t.Fatal(err)
 	}
-	// The buyer has never earned points, so no point_accounts row exists.
-	// The purchase must fail with "insufficient points", not a raw
-	// sql.ErrNoRows that the Worker presented as "item not found".
+	// ===== The buyer has never earned points, so no point_accounts row exists. =====
+	// ===== The purchase must fail with "insufficient points", not a raw =====
+	// ===== sql.ErrNoRows that the Worker presented as "item not found". =====
 	_, _, _, err := store.BuyShopItem(ctx, "guild-1", "user-new", "color", "interaction-buy-new-user")
 	if err == nil || err.Error() != "insufficient points" {
 		t.Fatalf("buy without point account err=%v, want insufficient points", err)

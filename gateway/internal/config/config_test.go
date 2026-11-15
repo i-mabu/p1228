@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// ===== 1. テスト用ヘルパー =====
 func writeConfig(t *testing.T, listen string) string {
 	t.Helper()
 	text := `gateway:
@@ -39,6 +40,7 @@ func setSecrets(t *testing.T) {
 	}
 }
 
+// ===== 2. 設定読み込みの検証テスト =====
 func TestLoadRequiresLoopbackAndThreeWorkers(t *testing.T) {
 	setSecrets(t)
 	cfg, err := Load(writeConfig(t, "127.0.0.1"))

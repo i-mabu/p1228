@@ -3,17 +3,23 @@ import { mkdir, readFile, readdir, rename, stat, unlink, utimes, writeFile } fro
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 
+// ===== 1. 型定義 =====
 export interface SynthesisOptions {
   text: string;
   speakerId: number;
   speed: number;
   volume: number;
-  /** Settings and dictionary revisions prevent stale speech from being reused. */
+  /** ===== Settings and dictionary revisions prevent stale speech from being reused. ===== */
   cacheRevision: string;
 }
 
-interface CacheFile { path: string; size: number; modifiedAt: number }
+interface CacheFile {
+  path: string;
+  size: number;
+  modifiedAt: number;
+}
 
+// ===== 2. 音声合成とキャッシュ =====
 export class AudioEngineClient {
   private readonly baseURL = (process.env.P1228_AUDIO_ENGINE_URL ?? 'http://127.0.0.1:50021').replace(/\/$/, '');
   private readonly cacheDirectory = process.env.P1228_AUDIO_CACHE_DIR ?? './data/audio-cache';
@@ -41,7 +47,7 @@ export class AudioEngineClient {
     queryURL.searchParams.set('speaker', String(options.speakerId));
     const queryResponse = await fetch(queryURL, { method: 'POST', signal: AbortSignal.timeout(20_000) });
     if (!queryResponse.ok) throw new Error(`Audio engine query failed: HTTP ${queryResponse.status}`);
-    const query = await queryResponse.json() as Record<string, unknown>;
+    const query = (await queryResponse.json()) as Record<string, unknown>;
     query['speedScale'] = normalized.speed;
     query['volumeScale'] = normalized.volume;
 
@@ -57,7 +63,7 @@ export class AudioEngineClient {
     const audio = Buffer.from(await synthesisResponse.arrayBuffer());
     if (!isWav(audio)) throw new Error('Audio engine returned an empty or invalid WAV payload');
 
-    // Large one-off files are returned but not cached. The cache is temporary and bounded.
+    // ===== Large one-off files are returned but not cached. The cache is temporary and bounded. =====
     if (audio.byteLength <= this.maxCacheBytes) {
       await this.writeCache(cachePath, audio).catch(() => undefined);
     }
@@ -95,7 +101,11 @@ export class AudioEngineClient {
 
   private async enforceCacheLimit(protectedPath: string): Promise<void> {
     let names: string[];
-    try { names = await readdir(this.cacheDirectory); } catch { return; }
+    try {
+      names = await readdir(this.cacheDirectory);
+    } catch {
+      return;
+    }
     const files: CacheFile[] = [];
     for (const name of names) {
       if (!name.endsWith('.wav')) continue;
@@ -103,7 +113,9 @@ export class AudioEngineClient {
       try {
         const info = await stat(path);
         if (info.isFile()) files.push({ path, size: info.size, modifiedAt: info.mtimeMs });
-      } catch { /* Concurrent cleanup or file replacement. */ }
+      } catch {
+        /* ===== Concurrent cleanup or file replacement. ===== */
+      }
     }
     const now = Date.now();
     for (const file of files) {
@@ -111,8 +123,7 @@ export class AudioEngineClient {
         await unlink(file.path).catch(() => undefined);
       }
     }
-    const retained = files.filter((file) => file.path === protectedPath || now - file.modifiedAt <= this.maxCacheAgeMs)
-      .sort((a, b) => a.modifiedAt - b.modifiedAt);
+    const retained = files.filter((file) => file.path === protectedPath || now - file.modifiedAt <= this.maxCacheAgeMs).sort((a, b) => a.modifiedAt - b.modifiedAt);
     let total = retained.reduce((sum, file) => sum + file.size, 0);
     for (const file of retained) {
       if (total <= this.maxCacheBytes) break;
@@ -123,6 +134,7 @@ export class AudioEngineClient {
   }
 }
 
+// ===== 3. ユーティリティ =====
 function isWav(audio: Buffer): boolean {
   return audio.byteLength >= 44 && audio.toString('ascii', 0, 4) === 'RIFF' && audio.toString('ascii', 8, 12) === 'WAVE';
 }

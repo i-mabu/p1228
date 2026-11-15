@@ -1,21 +1,12 @@
 import { createHash } from 'node:crypto';
-import {
-  AudioPlayerStatus,
-  createAudioPlayer,
-  createAudioResource,
-  entersState,
-  joinVoiceChannel,
-  StreamType,
-  VoiceConnectionStatus,
-  type AudioPlayer,
-  type VoiceConnection,
-} from '@discordjs/voice';
+import { AudioPlayerStatus, createAudioPlayer, createAudioResource, entersState, joinVoiceChannel, StreamType, VoiceConnectionStatus, type AudioPlayer, type VoiceConnection } from '@discordjs/voice';
 import { AudioEngineClient } from '../audio/engine.js';
 import { logger } from '../../core/logger.js';
 import type { GatewayClient } from '../../core/client.js';
 import type { ReadAloudSettings, VoiceServerPayload, VoiceStatePayload } from '../../core/types.js';
 import { createP1228AdapterCreator, P1228VoiceAdapter } from './adapter.js';
 
+// ===== 1. セッション型定義 =====
 interface GuildVoiceSession {
   connection: VoiceConnection;
   player: AudioPlayer;
@@ -25,6 +16,7 @@ interface GuildVoiceSession {
   processing: boolean;
 }
 
+// ===== 2. 音声サービスの実装 =====
 export class ReadAloudVoiceService {
   private readonly sessions = new Map<string, GuildVoiceSession>();
   private readonly engine = new AudioEngineClient();
@@ -38,10 +30,12 @@ export class ReadAloudVoiceService {
     const connection = joinVoiceChannel({
       guildId,
       channelId,
-      adapterCreator: createP1228AdapterCreator(this.client, guildId, (value) => { adapter = value; }),
+      adapterCreator: createP1228AdapterCreator(this.client, guildId, (value) => {
+        adapter = value;
+      }),
       selfDeaf: true,
       selfMute: false,
-      // @discordjs/voice DAVE encryption is enabled by default. Do not disable it.
+      // ===== @discordjs/voice DAVE encryption is enabled by default. Do not disable it. =====
     });
     const player = createAudioPlayer();
     connection.subscribe(player);
@@ -56,14 +50,20 @@ export class ReadAloudVoiceService {
     connection.on('error', (error) => logger.error('voice_connection_error', { guild_id: guildId, error: error.message }));
     player.on('error', (error) => logger.error('audio_player_error', { guild_id: guildId, error: error.message }));
     logger.info('voice_join_requested', { bot_id: this.client.botID, guild_id: guildId, channel_id: channelId });
-    // Do not block the Worker event loop here: VOICE_STATE_UPDATE / VOICE_SERVER_UPDATE
-    // must be consumed by that same loop before the connection can become Ready.
-    void entersState(connection, VoiceConnectionStatus.Ready, 25_000).then(() => {
-      logger.info('voice_connected', { bot_id: this.client.botID, guild_id: guildId, channel_id: channelId });
-    }).catch((error: unknown) => {
-      logger.error('voice_connection_timeout', { bot_id: this.client.botID, guild_id: guildId, error: error instanceof Error ? error.message : String(error) });
-      if (this.sessions.get(guildId) === session) { this.sessions.delete(guildId); connection.destroy(); }
-    });
+    // ===== この待機は Worker のイベントループをブロックしないこと。 =====
+    // ===== VOICE_STATE_UPDATE / VOICE_SERVER_UPDATE は同じループで処理されてから =====
+    // ===== 接続が Ready になるため、ここでは非同期で待機する。 =====
+    void entersState(connection, VoiceConnectionStatus.Ready, 25_000)
+      .then(() => {
+        logger.info('voice_connected', { bot_id: this.client.botID, guild_id: guildId, channel_id: channelId });
+      })
+      .catch((error: unknown) => {
+        logger.error('voice_connection_timeout', { bot_id: this.client.botID, guild_id: guildId, error: error instanceof Error ? error.message : String(error) });
+        if (this.sessions.get(guildId) === session) {
+          this.sessions.delete(guildId);
+          connection.destroy();
+        }
+      });
   }
 
   async leave(guildId: string): Promise<void> {
@@ -106,8 +106,8 @@ export class ReadAloudVoiceService {
       while (session.queue.length > 0 && this.sessions.get(guildId) === session) {
         const item = session.queue.shift();
         if (!item) continue;
-        // Isolate failures per item: one text that the audio engine
-        // rejects must not abort playback of everything queued behind it.
+        // ===== Isolate failures per item: one text that the audio engine =====
+        // ===== rejects must not abort playback of everything queued behind it. =====
         try {
           await entersState(session.connection, VoiceConnectionStatus.Ready, 25_000);
           const settingsSnapshot = await this.getSettings(guildId, item.userId);
@@ -127,8 +127,8 @@ export class ReadAloudVoiceService {
           logger.info('audio_playback_completed', { bot_id: this.client.botID, guild_id: guildId, queue_remaining: session.queue.length });
         } catch (itemError) {
           logger.error('audio_item_failed', { bot_id: this.client.botID, guild_id: guildId, error: itemError instanceof Error ? itemError.message : String(itemError) });
-          // If the session itself is gone, stop instead of failing every
-          // remaining queued item one by one.
+          // ===== If the session itself is gone, stop instead of failing every =====
+          // ===== remaining queued item one by one. =====
           if (this.sessions.get(guildId) !== session || session.connection.state.status === VoiceConnectionStatus.Destroyed) break;
         }
       }
@@ -155,7 +155,7 @@ export class ReadAloudVoiceService {
     ];
     const snapshots = await Promise.all(scopes.map(({ scope, scopeId }) => this.client.getSettings(scope, scopeId)));
     const defaults: ReadAloudSettings = { enabled: false, speed: 1.0, volume: 1.0, speaker_id: 1 };
-    const resolved = snapshots.reduce((value, snapshot) => snapshot.revision > 0 ? { ...value, ...snapshot.settings } : value, defaults);
+    const resolved = snapshots.reduce((value, snapshot) => (snapshot.revision > 0 ? { ...value, ...snapshot.settings } : value), defaults);
     return { revision: snapshots.map((snapshot) => snapshot.revision).join(':'), settings: resolved };
   }
 
@@ -165,7 +165,7 @@ export class ReadAloudVoiceService {
       this.client.getDictionary('guild', guildId),
       userId ? this.client.getDictionary('user', userId) : Promise.resolve([]),
     ]);
-    // Higher scopes override lower scopes for duplicate words: global -> guild -> user.
+    // ===== Higher scopes override lower scopes for duplicate words: global -> guild -> user. =====
     const byWord = new Map<string, (typeof global)[number]>();
     for (const entry of [...global, ...guild, ...user]) byWord.set(entry.word, entry);
     const entries = [...byWord.values()].sort((a, b) => b.word.length - a.word.length || a.word.localeCompare(b.word));

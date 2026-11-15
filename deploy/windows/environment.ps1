@@ -1,3 +1,4 @@
+# ===== 1. 環境ファイルの読み込み =====
 function Read-P1228EnvironmentFile {
   param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -30,6 +31,7 @@ function Read-P1228EnvironmentFile {
 }
 
 
+# ===== 2. 分離環境での実行 =====
 function Invoke-P1228WithIsolatedEnvironment {
   param(
     [Parameter(Mandatory = $true)][System.Collections.IDictionary]$Environment,

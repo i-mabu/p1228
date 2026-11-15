@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# ===== 1. 準備 =====
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+failed=0
+
+# ===== 2. フォーマットチェック =====
+if command -v gofmt >/dev/null 2>&1; then
+  unformatted="$(cd gateway && gofmt -l .)"
+  if [[ -n "$unformatted" ]]; then
+    echo "Unformatted Go files (run scripts/format.sh):" >&2
+    echo "$unformatted" >&2
+    failed=1
+  fi
+fi
+
+if [[ -x workers/node_modules/.bin/prettier ]]; then
+  if ! (cd workers && npm run --silent format:check >/dev/null 2>&1); then
+    echo "Prettier check failed (run scripts/format.sh)." >&2
+    failed=1
+  fi
+fi
+
+if command -v shfmt >/dev/null 2>&1; then
+  if ! shfmt -i 2 -ci -d deploy/install-ubuntu.sh deploy/scripts/*.sh scripts/format.sh .githooks/pre-commit >/dev/null; then
+    echo "shfmt check failed (run scripts/format.sh)." >&2
+    failed=1
+  fi
+fi
+
+if [[ "$failed" -ne 0 ]]; then
+  exit 1
+fi
+echo "pre-commit: format checks passed."

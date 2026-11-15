@@ -7,11 +7,11 @@ Discord BOT 3体を、**Go Gateway + 独立した TypeScript Worker** で運用�
 
 ## ✨ BOT構成
 
-| BOT | Worker ID | 主な役割 | Watching表示 |
-|---|---|---|---|
-| 星燈 | `general` | サーバー機能・管理コマンド | サーバーを見守り中 |
-| 言ノ葉 | `read_aloud_a` | 読み上げ・独立Voiceセッション | 言葉を紡ぎ中 |
-| 紡言 | `read_aloud_b` | 読み上げ・独立Voiceセッション | 声をお届け中 |
+| BOT    | Worker ID      | 主な役割                      | Watching表示       |
+| ------ | -------------- | ----------------------------- | ------------------ |
+| 星燈   | `general`      | サーバー機能・管理コマンド    | サーバーを見守り中 |
+| 言ノ葉 | `read_aloud_a` | 読み上げ・独立Voiceセッション | 言葉を紡ぎ中       |
+| 紡言   | `read_aloud_b` | 読み上げ・独立Voiceセッション | 声をお届け中       |
 
 Go Gatewayが各BOTのDiscord Gateway接続、REST操作、Interaction応答、SQLite、Worker向け内部APIを担当します。表示文言は `config/gateway.yaml` または `config/gateway.windows.yaml` の各BOTにある `watching` で変更できます。変更後はGatewayを再起動してください。
 
@@ -49,13 +49,13 @@ Go Gatewayが各BOTのDiscord Gateway接続、REST操作、Interaction応答、S
 
 ## 💻 必要環境
 
-| 項目 | 要件・用途 |
-|---|---|
-| OS | Windows 10/11（開発）、Ubuntu 24.04 LTS（本番手順） |
-| Go | 1.23以上 |
-| Node.js / npm | Node.js 24.17以上、npm 10以上を推奨 |
-| FFmpeg / Opus | Voice音声再生 |
-| SQLite CLI | 運用時のDB検査・バックアップ |
+| 項目          | 要件・用途                                          |
+| ------------- | --------------------------------------------------- |
+| OS            | Windows 10/11（開発）、Ubuntu 24.04 LTS（本番手順） |
+| Go            | 1.23以上                                            |
+| Node.js / npm | Node.js 24.17以上、npm 10以上を推奨                 |
+| FFmpeg / Opus | Voice音声再生                                       |
+| SQLite CLI    | 運用時のDB検査・バックアップ                        |
 
 Voice関連依存はバージョン固定です。更新時はCustom AdapterとDAVEを含むVoice E2E試験を再実施してください。
 
@@ -69,7 +69,7 @@ Voice関連依存はバージョン固定です。更新時はCustom AdapterとD
 
 ```powershell
 Copy-Item .env.example .env
-# .env を編集
+# ===== .env を編集 =====
 Set-ExecutionPolicy -Scope Process Bypass
 .\deploy\windows\start.ps1
 ```
@@ -123,16 +123,16 @@ Discord実接続、コマンド登録、権限、Voice/DAVE/UDP/Opus、ローカ
 
 ## 📚 ドキュメント
 
-| ドキュメント | 内容 |
-|---|---|
-| [アーキテクチャ概要](./docs/architecture/overview.md) | コンポーネント、イベント配送、信頼境界 |
-| [内部API](./docs/api/internal-api.md) | Worker認証、イベント、REST・Interaction API |
-| [データベーススキーマ](./docs/database/schema.md) | テーブル、永続化、保持期間 |
-| [星燈機能の運用](./docs/operations/star-features.md) | コマンド、権限、ポイント・ショップ |
-| [ローカルバックアップと復元](./docs/operations/local-backup.md) | バックアップ、復元、保持期間 |
-| [Worker障害時のPresence](./docs/operations/worker-failover.md) | Heartbeatと障害表示 |
-| [実装状況と既知の制約](./docs/operations/implementation-status.md) | 実装済み範囲、未検証項目 |
-| [本番投入前チェックリスト](./docs/operations/production-checklist.md) | 本番化の受け入れ確認 |
+| ドキュメント                                                                              | 内容                                         |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------- |
+| [アーキテクチャ概要](./docs/architecture/overview.md)                                     | コンポーネント、イベント配送、信頼境界       |
+| [内部API](./docs/api/internal-api.md)                                                     | Worker認証、イベント、REST・Interaction API  |
+| [データベーススキーマ](./docs/database/schema.md)                                         | テーブル、永続化、保持期間                   |
+| [星燈機能の運用](./docs/operations/star-features.md)                                      | コマンド、権限、ポイント・ショップ           |
+| [ローカルバックアップと復元](./docs/operations/local-backup.md)                           | バックアップ、復元、保持期間                 |
+| [Worker障害時のPresence](./docs/operations/worker-failover.md)                            | Heartbeatと障害表示                          |
+| [実装状況と既知の制約](./docs/operations/implementation-status.md)                        | 実装済み範囲、未検証項目                     |
+| [本番投入前チェックリスト](./docs/operations/production-checklist.md)                     | 本番化の受け入れ確認                         |
 | [コードレビュー・修正レポート（2026-11-15）](./docs/operations/code-review-2026-11-15.md) | 全体レビューで修正したバグ・最適化と検証結果 |
 
 ---

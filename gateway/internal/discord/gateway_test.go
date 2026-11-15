@@ -11,6 +11,7 @@ import (
 	"p1228/gateway/internal/config"
 )
 
+// ===== 1. Discord操作の検証テスト =====
 func TestRoleOperationsRestrictedToGeneralBot(t *testing.T) {
 	manager := NewManager(&config.Config{Bots: map[string]config.BotConfig{
 		"read_aloud_a": {Token: "test-token"},
@@ -118,6 +119,7 @@ func TestFeatureDispatchesAreScopedToGeneralBot(t *testing.T) {
 	}
 }
 
+// ===== 2. プレゼンスとWorker監視の検証テスト =====
 func TestWorkerFailurePresenceUsesWatchingActivity(t *testing.T) {
 	payload, err := json.Marshal(workerPresenceUpdate(config.BotConfig{Watching: "通常の視聴中"}, true))
 	if err != nil {

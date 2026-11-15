@@ -1,3 +1,4 @@
+-- ===== 1. ギルド機能設定とブラックリスト =====
 CREATE TABLE IF NOT EXISTS guild_feature_settings (
     guild_id TEXT NOT NULL,
     setting_key TEXT NOT NULL,
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS guild_user_blacklist (
     PRIMARY KEY (guild_id, user_id)
 );
 
+-- ===== 2. スティッキーとポイント =====
 CREATE TABLE IF NOT EXISTS sticky_messages (
     guild_id TEXT NOT NULL,
     channel_id TEXT NOT NULL,
@@ -44,6 +46,7 @@ CREATE TABLE IF NOT EXISTS point_ledger (
 );
 CREATE INDEX IF NOT EXISTS idx_point_ledger_user ON point_ledger(guild_id, user_id, created_at);
 
+-- ===== 3. ショップとおみくじ =====
 CREATE TABLE IF NOT EXISTS shop_items (
     guild_id TEXT NOT NULL,
     item_id TEXT NOT NULL,
@@ -71,6 +74,7 @@ CREATE TABLE IF NOT EXISTS omikuji_draws (
     PRIMARY KEY (guild_id, user_id, draw_date)
 );
 
+-- ===== 4. 機能アクションの冪等性 =====
 CREATE TABLE IF NOT EXISTS star_feature_actions (
     event_key TEXT PRIMARY KEY,
     result_json TEXT NOT NULL,

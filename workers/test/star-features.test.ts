@@ -2,12 +2,14 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { eventGuildId, formatMemberMessage, resolveVoiceLogChannel, starCommands } from '../src/general/star-features.js';
 
+// ===== 1. ギルドID解決の検証 =====
 test('guild ID resolution never treats a DM message ID as a guild ID', () => {
   assert.equal(eventGuildId('MESSAGE_CREATE', { id: 'message-1', channel_id: 'dm-channel' }), '');
   assert.equal(eventGuildId('GUILD_CREATE', { id: 'guild-1' }), 'guild-1');
   assert.equal(eventGuildId('MESSAGE_CREATE', { id: 'message-1', guild_id: 'guild-1' }), 'guild-1');
 });
 
+// ===== 2. 音声ログ振り分けの検証 =====
 test('voice log routing prioritizes channel, then category, then default', () => {
   const settings = {
     'log.voice': 'default-log',
@@ -20,11 +22,9 @@ test('voice log routing prioritizes channel, then category, then default', () =>
   assert.equal(resolveVoiceLogChannel({}, 'channel-2', ''), '');
 });
 
+// ===== 3. メンバーメッセージ整形の検証 =====
 test('member message placeholders use current member and server values', () => {
-  assert.equal(
-    formatMemberMessage('Welcome {user} ({username}) to {server} [{user_id}]', '123', 'Tomo', 'Server'),
-    'Welcome <@123> (Tomo) to Server [123]',
-  );
+  assert.equal(formatMemberMessage('Welcome {user} ({username}) to {server} [{user_id}]', '123', 'Tomo', 'Server'), 'Welcome <@123> (Tomo) to Server [123]');
   assert.equal(formatMemberMessage('x'.repeat(2100), '1', 'Tomo', 'Server').length, 2000);
 });
 
@@ -34,6 +34,7 @@ test('member message truncation does not split Unicode surrogate pairs', () => {
   assert.equal(formatted.endsWith('😀'), true);
 });
 
+// ===== 4. スラッシュコマンド定義の検証 =====
 test('StarTomo slash commands have unique names and include requested features', () => {
   const names = starCommands.map((command) => command.name);
   assert.equal(new Set(names).size, names.length);

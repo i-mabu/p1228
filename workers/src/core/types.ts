@@ -1,3 +1,4 @@
+// ===== 1. イベントとインタラクションの型 =====
 export type BotId = 'general' | 'read_aloud_a' | 'read_aloud_b';
 export type WorkerRole = 'general' | 'read-aloud';
 
@@ -36,6 +37,7 @@ export interface InteractionPayload {
   };
 }
 
+// ===== 2. メッセージと星燈機能の型 =====
 export interface DiscordMessagePayload {
   id: string;
   guild_id?: string;
@@ -65,6 +67,7 @@ export interface GuildMemberPayload {
   nick?: string | null;
 }
 
+// ===== 3. 音声イベントの型 =====
 export interface VoiceLogPayload {
   guild_id: string;
   user_id: string;
@@ -88,6 +91,7 @@ export interface VoiceServerPayload {
   endpoint: string;
 }
 
+// ===== 4. 読み上げ設定と辞書の型 =====
 export interface ReadAloudSettings {
   enabled: boolean;
   speed: number;

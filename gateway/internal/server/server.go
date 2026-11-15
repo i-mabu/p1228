@@ -20,6 +20,7 @@ import (
 	"p1228/gateway/internal/storage"
 )
 
+// ===== 1. 型定義とサーバー生成 =====
 type Server struct {
 	cfg        *config.Config
 	store      *storage.Storage
@@ -49,6 +50,8 @@ func (s *Server) ListenAndServe() error {
 	s.log.Info("internal API listening", "address", s.httpServer.Addr)
 	return s.httpServer.Serve(listener)
 }
+
+// ===== 2. ルーティングと認証 =====
 func (s *Server) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	if r.URL.Path == "/internal/v1/health" {
@@ -122,9 +125,9 @@ func (s *Server) authenticate(r *http.Request) (authContext, bool) {
 	if a == "" {
 		return authContext{}, false
 	}
-	// Compare fixed-length digests: comparing the raw secrets with
-	// ConstantTimeCompare returns early when lengths differ, which would
-	// leak the configured secret's length through timing.
+	// ===== Compare fixed-length digests: comparing the raw secrets with =====
+	// ===== ConstantTimeCompare returns early when lengths differ, which would =====
+	// ===== leak the configured secret's length through timing. =====
 	presented := sha256.Sum256([]byte(a))
 	expected := sha256.Sum256([]byte(w.Secret))
 	if subtle.ConstantTimeCompare(presented[:], expected[:]) != 1 {
@@ -132,6 +135,8 @@ func (s *Server) authenticate(r *http.Request) (authContext, bool) {
 	}
 	return authContext{Worker: w}, true
 }
+
+// ===== 3. イベント受付ハンドラ =====
 func (s *Server) register(w http.ResponseWriter, r *http.Request, a authContext) {
 	var req struct {
 		InstanceID string `json:"instance_id"`
@@ -229,6 +234,8 @@ func (s *Server) eventNack(w http.ResponseWriter, r *http.Request, a authContext
 	}
 	writeJSON(w, 200, map[string]any{"success": true})
 }
+
+// ===== 4. Discord操作・設定・辞書ハンドラ =====
 func (s *Server) discordOperation(w http.ResponseWriter, r *http.Request, a authContext) {
 	var req map[string]json.RawMessage
 	if !decode(w, r, &req) {
@@ -415,6 +422,7 @@ func (s *Server) requireGeneralWorker(w http.ResponseWriter, a authContext) bool
 	return true
 }
 
+// ===== 5. 星燈機能ハンドラ =====
 func (s *Server) starSettings(w http.ResponseWriter, r *http.Request, a authContext) {
 	if !s.requireGeneralWorker(w, a) {
 		return
@@ -637,6 +645,7 @@ func (s *Server) starShop(w http.ResponseWriter, r *http.Request, a authContext)
 	writeJSON(w, 200, map[string]any{"success": true, "item": item, "balance": account.Balance, "role_pending": rolePending})
 }
 
+// ===== 6. レスポンス用ヘルパーと終了処理 =====
 func decode(w http.ResponseWriter, r *http.Request, v any) bool {
 	r.Body = http.MaxBytesReader(w, r.Body, 2<<20)
 	d := json.NewDecoder(r.Body)
@@ -664,8 +673,8 @@ func methodNotAllowed(w http.ResponseWriter) {
 	writeError(w, 405, "METHOD_NOT_ALLOWED", "method not allowed")
 }
 func truncate(v string, n int) string {
-	// Cut on a rune boundary so persisted error text stays valid UTF-8
-	// even when the reason contains multi-byte characters.
+	// ===== Cut on a rune boundary so persisted error text stays valid UTF-8 =====
+	// ===== even when the reason contains multi-byte characters. =====
 	for len(v) > n {
 		_, size := utf8.DecodeLastRuneInString(v)
 		v = v[:len(v)-size]

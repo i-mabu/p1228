@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { BotId, DictionaryEntry, EventEnvelope, ReadAloudSettings, ShopItem, StickyMessage } from './types.js';
 
+// ===== 1. Gatewayクライアント =====
 export class GatewayClient {
   readonly instanceId = randomUUID();
   readonly baseURL: string;
@@ -29,7 +30,11 @@ export class GatewayClient {
     });
     const text = await response.text();
     let parsed: unknown = {};
-    try { parsed = text ? JSON.parse(text) : {}; } catch { parsed = { raw: text.slice(0, 500) }; }
+    try {
+      parsed = text ? JSON.parse(text) : {};
+    } catch {
+      parsed = { raw: text.slice(0, 500) };
+    }
     if (!response.ok) {
       const detail = parsed && typeof parsed === 'object' && 'error' in parsed ? JSON.stringify((parsed as { error: unknown }).error) : `HTTP ${response.status}`;
       throw new Error(`Gateway API ${method} ${path}: ${detail}`);
@@ -117,7 +122,10 @@ export class GatewayClient {
 
   async updateStickyMessageId(sticky: StickyMessage, oldMessageId: string, messageId: string): Promise<void> {
     await this.request('data/star/sticky', 'POST', {
-      guild_id: sticky.guild_id, channel_id: sticky.channel_id, old_message_id: oldMessageId, message_id: messageId,
+      guild_id: sticky.guild_id,
+      channel_id: sticky.channel_id,
+      old_message_id: oldMessageId,
+      message_id: messageId,
     });
   }
 
@@ -152,10 +160,15 @@ export class GatewayClient {
     await this.discordOperation('add_role', { guild_id: guildId, user_id: userId, role_id: roleId }, operationId);
   }
 
-  get workerID(): string { return this.workerId; }
-  get botID(): BotId { return this.botId; }
+  get workerID(): string {
+    return this.workerId;
+  }
+  get botID(): BotId {
+    return this.botId;
+  }
 }
 
+// ===== 2. 環境変数の取得 =====
 function required(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`Required environment variable ${name} is missing`);

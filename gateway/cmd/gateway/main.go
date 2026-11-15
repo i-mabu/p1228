@@ -17,12 +17,14 @@ import (
 	"p1228/gateway/internal/storage"
 )
 
+// ===== 1. エントリポイント =====
 func main() {
 	if err := run(); err != nil {
 		os.Exit(1)
 	}
 }
 
+// ===== 2. 起動処理 =====
 func run() error {
 	configPath := flag.String("config", "./config/gateway.yaml", "path to gateway YAML configuration")
 	flag.Parse()
@@ -48,8 +50,8 @@ func run() error {
 	}
 
 	manager := discord.NewManager(cfg, store, log)
-	// server.New re-indexes workers by worker_id, so the config map can be
-	// passed directly instead of copying it entry by entry.
+	// ===== server.New re-indexes workers by worker_id, so the config map can be =====
+	// ===== passed directly instead of copying it entry by entry. =====
 	api := server.New(cfg, store, manager, cfg.Workers, log)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

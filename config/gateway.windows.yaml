@@ -1,3 +1,4 @@
+# ===== 1. Gateway設定 =====
 gateway:
   listen_address: "127.0.0.1"
   listen_port: 8787
@@ -6,6 +7,7 @@ gateway:
   interaction_ttl_seconds: 900
   event_payload_retention_hours: 24
 
+# ===== 2. BOT定義 =====
 bots:
   general:
     display_name: "星燈"
@@ -26,6 +28,7 @@ bots:
     token_env: "P1228_READ_ALOUD_B_BOT_TOKEN"
     intents: 33409
 
+# ===== 3. Worker定義 =====
 workers:
   general:
     worker_id: "general"
@@ -43,6 +46,7 @@ workers:
     bot_id: "read_aloud_b"
     secret_env: "P1228_READ_ALOUD_B_WORKER_SECRET"
 
+# ===== 4. データベースとログ =====
 database:
   path: "./data/database/p1228.db"
 

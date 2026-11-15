@@ -8,12 +8,15 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "dev:general": "tsx src/general/index.ts",
     "dev:read-aloud": "tsx src/read-aloud/index.ts",
     "start:general": "node dist/general/index.js",
     "start:read-aloud": "node dist/read-aloud/index.js",
     "sync:commands": "tsx src/sync-commands.ts",
-    "test": "tsx --test test/*.test.ts"
+    "test": "tsx --test test/*.test.ts",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"package.json\" \"tsconfig.json\" \"../config/*.yaml\" \"../.github/workflows/*.yml\" \"../.github/dependabot.yml\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"package.json\" \"tsconfig.json\" \"../config/*.yaml\" \"../.github/workflows/*.yml\" \"../.github/dependabot.yml\""
   },
   "dependencies": {
     "@discordjs/opus": "0.10.0",
@@ -22,6 +25,7 @@
   },
   "devDependencies": {
     "@types/node": "24.10.0",
+    "prettier": "3.10.1",
     "tsx": "4.20.6",
     "typescript": "5.9.3"
   }

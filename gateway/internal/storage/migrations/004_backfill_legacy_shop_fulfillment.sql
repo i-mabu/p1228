@@ -1,5 +1,6 @@
--- Rows purchased before fulfillment tracking existed were already fulfilled
--- by the previous purchase flow. Only post-migration purchases may remain pending.
+-- ===== 1. 旧データの移行 =====
+-- ===== Rows purchased before fulfillment tracking existed were already fulfilled =====
+-- ===== by the previous purchase flow. Only post-migration purchases may remain pending. =====
 UPDATE user_inventory
    SET role_status='fulfilled'
  WHERE role_status='pending'

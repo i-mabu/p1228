@@ -1,3 +1,4 @@
+# ===== 1. 初期化と環境読み込み =====
 param([string]$ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path)
 $ErrorActionPreference = 'Stop'
 Set-Location $ProjectRoot
@@ -11,6 +12,7 @@ $items = @(
   @{ Bot='read_aloud_b'; Worker='read_aloud_b'; Secret=$values['P1228_READ_ALOUD_B_WORKER_SECRET']; App=$values['P1228_READ_ALOUD_B_APPLICATION_ID'] }
 )
 $gatewayUrl = if ($values['P1228_GATEWAY_URL']) { $values['P1228_GATEWAY_URL'] } else { 'http://127.0.0.1:8787' }
+# ===== 2. コマンド登録の実行 =====
 foreach ($item in $items) {
   if (-not $item.Secret -or -not $item.App) {
     throw "Missing Worker secret or Application ID for $($item.Bot) in .env"

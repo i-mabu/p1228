@@ -1,3 +1,4 @@
+# ===== 1. 初期化と停止対象の定義 =====
 param([string]$ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path)
 $ErrorActionPreference = 'Stop'
 $runtime = Join-Path $ProjectRoot '.runtime'
@@ -11,6 +12,7 @@ $expected = @{
   'read-aloud-b' = @{ Executable = if ($nodeCommand) { $nodeCommand.Source } else { $null }; Script = (Join-Path $ProjectRoot 'workers/dist/read-aloud/index.js') }
 }
 
+# ===== 2. プロセスの停止処理 =====
 Get-ChildItem -Path $runtime -Filter '*.pid' | Sort-Object Name -Descending | ForEach-Object {
   $target = $expected[$_.BaseName]
   if (-not $target) {
@@ -51,10 +53,11 @@ Get-ChildItem -Path $runtime -Filter '*.pid' | Sort-Object Name -Descending | Fo
   Write-Host "Stopped $($_.BaseName) ($processId)"
 }
 
+# ===== 3. 終了確認 =====
 $remainingPidFiles = @(Get-ChildItem -LiteralPath $runtime -Filter '*.pid' -File)
 if ($remainingPidFiles.Count -gt 0) {
   Write-Warning 'Some processes may still be running.'
   exit 1
 }
 
-# Runtime logs stay in .runtime/; there is no remote log archive anymore.
+# ===== Runtime logs stay in .runtime/; there is no remote log archive anymore. =====

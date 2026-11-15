@@ -9,12 +9,14 @@ import (
 	"time"
 )
 
+// ===== 1. テスト用トランスポート =====
 type roundTripFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripFunc) RoundTrip(request *http.Request) (*http.Response, error) {
 	return f(request)
 }
 
+// ===== 2. AutoDeferと応答状態の検証テスト =====
 func TestAutoDeferFailureDoesNotMarkInteractionAcknowledged(t *testing.T) {
 	store := NewInteractionStore(nil)
 	store.refs["ref"] = &interactionRef{BotID: "general", InteractionID: "interaction", Token: "token", ApplicationID: "app", Expires: time.Now().Add(time.Minute)}
@@ -66,6 +68,7 @@ func TestAutoDeferSuccessCommitsACKState(t *testing.T) {
 	}
 }
 
+// ===== 3. 遅延コンポーネント応答の検証テスト =====
 func TestLateComponentMessageBecomesFollowupAfterAutoDefer(t *testing.T) {
 	store := NewInteractionStore(nil)
 	store.refs["ref"] = &interactionRef{

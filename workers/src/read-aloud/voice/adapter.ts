@@ -1,20 +1,17 @@
-import type {
-  DiscordGatewayAdapterCreator,
-  DiscordGatewayAdapterImplementerMethods,
-  DiscordGatewayAdapterLibraryMethods,
-} from '@discordjs/voice';
+import type { DiscordGatewayAdapterCreator, DiscordGatewayAdapterImplementerMethods, DiscordGatewayAdapterLibraryMethods } from '@discordjs/voice';
 import type { GatewayClient } from '../../core/client.js';
 import { logger } from '../../core/logger.js';
 import type { VoiceServerPayload, VoiceStatePayload } from '../../core/types.js';
 
+// ===== 1. 定数と型定義 =====
 const MAX_OUTBOUND_QUEUE = 100;
 
 type VoicePayload = { op: number; d: Record<string, unknown> };
 
-/**
- * Custom Adapter boundary for p1228.
- * sendPayload is synchronous by design: it only appends to a bounded in-memory queue.
- * The async dispatcher transfers opcode 4 to Go; HTTP is never awaited by sendPayload.
+// ===== 2. 音声アダプタ =====
+/** ===== Custom Adapter boundary for p1228. =====
+ * ===== sendPayload is synchronous by design: it only appends to a bounded in-memory queue. =====
+ * ===== The async dispatcher transfers opcode 4 to Go; HTTP is never awaited by sendPayload. =====
  */
 export class P1228VoiceAdapter {
   private readonly queue: VoicePayload[] = [];
@@ -94,7 +91,7 @@ export class P1228VoiceAdapter {
             guild_id: this.guildId,
             error: error instanceof Error ? error.message : String(error),
           });
-          // Do not replay an already ambiguous opcode 4 automatically. Disconnect the adapter instead.
+          // ===== Do not replay an already ambiguous opcode 4 automatically. Disconnect the adapter instead. =====
           this.fail();
           break;
         }
@@ -106,12 +103,11 @@ export class P1228VoiceAdapter {
   }
 }
 
-export const createP1228AdapterCreator = (
-  client: GatewayClient,
-  guildId: string,
-  onCreate: (adapter: P1228VoiceAdapter) => void,
-): DiscordGatewayAdapterCreator => (methods) => {
-  const adapter = new P1228VoiceAdapter(client, guildId, methods);
-  onCreate(adapter);
-  return adapter.asCreatorResult();
-};
+// ===== 3. アダプタ生成 =====
+export const createP1228AdapterCreator =
+  (client: GatewayClient, guildId: string, onCreate: (adapter: P1228VoiceAdapter) => void): DiscordGatewayAdapterCreator =>
+  (methods) => {
+    const adapter = new P1228VoiceAdapter(client, guildId, methods);
+    onCreate(adapter);
+    return adapter.asCreatorResult();
+  };

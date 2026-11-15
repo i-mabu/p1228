@@ -1,3 +1,4 @@
+# ===== 1. 初期化と必須項目の確認 =====
 param(
   [string]$ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 )
@@ -24,6 +25,7 @@ $goNumeric = [version](((& go version) -split 'go')[-1].Split(' ')[0])
 if ($goNumeric -lt [version]'1.23.0') { throw "Go 1.23.0 or newer is required; found $goVersion" }
 Write-Host "Building p1228 ($goVersion, $nodeVersion)"
 
+# ===== 2. ビルド =====
 Push-Location 'gateway'
 try { & go build -o (Join-Path $ProjectRoot '.runtime/p1228-gateway.exe') ./cmd/gateway; if ($LASTEXITCODE -ne 0) { throw 'Go build failed' } }
 finally { Pop-Location }
@@ -34,6 +36,7 @@ try {
 }
 finally { Pop-Location }
 
+# ===== 3. Gatewayの起動とヘルスチェック =====
 $logDir = Join-Path $ProjectRoot '.runtime'
 $runId = [DateTime]::UtcNow.ToString("yyyyMMdd'T'HHmmssfff'Z'", [Globalization.CultureInfo]::InvariantCulture) + '-' + [guid]::NewGuid().ToString('N')
 $gatewayEnvironment = @{}
@@ -69,6 +72,7 @@ if (-not $ready) {
   throw "Gateway did not become healthy: $lastHealthError. Check .runtime/gateway.log"
 }
 
+# ===== 4. Workerの起動 =====
 $workers = @(
   @{ Name='general'; Bot='general'; Secret=$values['P1228_GENERAL_WORKER_SECRET']; App=$values['P1228_GENERAL_APPLICATION_ID']; Script='dist/general/index.js' },
   @{ Name='read-aloud-a'; Bot='read_aloud_a'; Secret=$values['P1228_READ_ALOUD_A_WORKER_SECRET']; App=$values['P1228_READ_ALOUD_A_APPLICATION_ID']; Script='dist/read-aloud/index.js' },

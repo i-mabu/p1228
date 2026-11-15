@@ -11,6 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// ===== 1. 型定義 =====
 type Config struct {
 	Gateway  GatewayConfig           `yaml:"gateway"`
 	Bots     map[string]BotConfig    `yaml:"bots"`
@@ -54,6 +55,7 @@ type LoggingConfig struct {
 	Format string `yaml:"format"`
 }
 
+// ===== 2. 設定の読み込みと検証 =====
 func Load(path string) (*Config, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {

@@ -1,0 +1,54 @@
+# ===== 1. ワークフロー全体設定 =====
+name: Format (auto-fix)
+
+# ===== pull_request イベントでは fork の権限問題があるため対象にしない。 =====
+# ===== main への push と手動実行のときだけ、整形結果を自動コミットする。 =====
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ===== 2. 自動整形ジョブ =====
+  format:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.2"
+          cache-dependency-path: gateway/go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.17.0"
+          cache: npm
+          cache-dependency-path: workers/package-lock.json
+      - name: Install shfmt
+        run: |
+          curl -sSfL -o /tmp/shfmt https://github.com/mvdan/sh/releases/download/v3.10.0/shfmt_v3.10.0_linux_amd64
+          sudo install -m 0755 /tmp/shfmt /usr/local/bin/shfmt
+          shfmt --version
+      - name: Apply formatters
+        run: bash scripts/format.sh
+      - name: Commit formatting changes
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No formatting changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "style: フォーマッタを自動適用 [skip ci]"
+          git push

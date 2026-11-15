@@ -9,7 +9,8 @@ import (
 	"p1228/gateway/internal/config"
 )
 
-// Built by repetition so the fixture stays obviously fake.
+// ===== 1. テスト用ヘルパー =====
+// ===== Built by repetition so the fixture stays obviously fake. =====
 var testWorkerSecret = strings.Repeat("test-secret-", 3)
 
 func testServer() *Server {
@@ -28,6 +29,7 @@ func requestWithAuth(workerID, authorization string) *http.Request {
 	return r
 }
 
+// ===== 2. 認証とユーティリティの検証テスト =====
 func TestAuthenticateAcceptsExactSecret(t *testing.T) {
 	s := testServer()
 	if _, ok := s.authenticate(requestWithAuth("general", "Bearer "+testWorkerSecret)); !ok {

@@ -4,6 +4,7 @@ import type { EventEnvelope, InteractionPayload, DiscordMessagePayload, VoiceSer
 import { GatewayClient } from '../core/client.js';
 import { ReadAloudVoiceService } from './voice/service.js';
 
+// ===== 1. イベント処理とコマンド実行 =====
 async function main(): Promise<void> {
   const client = new GatewayClient();
   const voice = new ReadAloudVoiceService(client);
@@ -78,6 +79,7 @@ async function main(): Promise<void> {
   }, client);
 }
 
+// ===== 2. 起動 =====
 main().catch((error) => {
   logger.error('read_aloud_fatal', { error: error instanceof Error ? error.message : String(error) });
   process.exitCode = 1;

@@ -1,15 +1,29 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# ===== 1. 前提チェック =====
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-[[ "$(id -u)" == "0" ]] || { echo "Run with sudo: sudo $0" >&2; exit 1; }
+[[ "$(id -u)" == "0" ]] || {
+  echo "Run with sudo: sudo $0" >&2
+  exit 1
+}
 
-for command in go node npm; do command -v "$command" >/dev/null || { echo "Missing $command; install the required toolchain first." >&2; exit 1; }; done
+for command in go node npm; do command -v "$command" >/dev/null || {
+  echo "Missing $command; install the required toolchain first." >&2
+  exit 1
+}; done
 GO_VERSION="$(go version | awk '{print $3}' | sed 's/^go//')"
 NODE_VERSION="$(node --version | sed 's/^v//')"
-if [[ "$(printf '%s\n' 1.23.0 "$GO_VERSION" | sort -V | head -n1)" != "1.23.0" ]]; then echo "Go >= 1.23.0 required; found $GO_VERSION" >&2; exit 1; fi
-if [[ "$(printf '%s\n' 24.17.0 "$NODE_VERSION" | sort -V | head -n1)" != "24.17.0" ]]; then echo "Node.js >= 24.17.0 required; found $NODE_VERSION" >&2; exit 1; fi
+if [[ "$(printf '%s\n' 1.23.0 "$GO_VERSION" | sort -V | head -n1)" != "1.23.0" ]]; then
+  echo "Go >= 1.23.0 required; found $GO_VERSION" >&2
+  exit 1
+fi
+if [[ "$(printf '%s\n' 24.17.0 "$NODE_VERSION" | sort -V | head -n1)" != "24.17.0" ]]; then
+  echo "Node.js >= 24.17.0 required; found $NODE_VERSION" >&2
+  exit 1
+fi
 
+# ===== 2. パッケージとユーザー・ディレクトリの準備 =====
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl ffmpeg sqlite3 gzip python3 build-essential pkg-config libopus-dev
 getent group p1228 >/dev/null || groupadd --system p1228
@@ -22,6 +36,7 @@ install -d -o p1228 -g p1228 -m 0750 /opt/p1228 /opt/p1228/bin /var/lib/p1228/da
 install -d -o root -g p1228 -m 0750 /etc/p1228
 install -d -o root -g root -m 0750 /var/backups/p1228/sqlite /var/spool/p1228/archive/logs
 
+# ===== 3. 設定ファイルと環境ファイルの配置 =====
 if [[ ! -f /etc/p1228/gateway.yaml ]]; then install -m 0640 -o root -g p1228 "$ROOT/config/gateway.yaml" /etc/p1228/gateway.yaml; fi
 install -d -m 0755 /etc/systemd/journald.conf.d
 install -m 0644 "$ROOT/deploy/journald/limits.conf" /etc/systemd/journald.conf.d/p1228-limits.conf
@@ -29,7 +44,7 @@ install -m 0644 "$ROOT/deploy/journald/limits.conf" /etc/systemd/journald.conf.d
 write_env_if_missing() {
   local target="$1"
   if [[ ! -e "$target" ]]; then
-    cat > "$target"
+    cat >"$target"
     echo "Created $target (fill in the placeholders before starting BOT services)."
   else
     echo "Preserved existing $target."
@@ -82,10 +97,11 @@ P1228_DB_PATH=/var/lib/p1228/database/p1228.db
 P1228_DB_BACKUP_DIR=/var/backups/p1228/sqlite
 P1228_ALERT_WEBHOOK_URL=
 ENV
-# systemd (PID 1) reads EnvironmentFile before dropping privileges. Keep all secrets root-only.
+# ===== systemd (PID 1) reads EnvironmentFile before dropping privileges. Keep all secrets root-only. =====
 chown root:root /etc/p1228/*.env
 chmod 0600 /etc/p1228/*.env
 
+# ===== 4. 運用スクリプトとsystemdユニットの配置 =====
 install -d -m 0755 /usr/local/sbin
 install -m 0755 "$ROOT/deploy/scripts/archive-logs.sh" /usr/local/sbin/p1228-archive-logs.sh
 install -m 0755 "$ROOT/deploy/scripts/backup-sqlite.sh" /usr/local/sbin/p1228-backup-sqlite.sh
@@ -112,6 +128,7 @@ chmod 2770 /var/cache/p1228/audio
 chown root:root /var/backups/p1228 /var/backups/p1228/sqlite /var/spool/p1228 /var/spool/p1228/archive /var/spool/p1228/archive/logs
 chmod 0750 /var/backups/p1228 /var/backups/p1228/sqlite /var/spool/p1228 /var/spool/p1228/archive /var/spool/p1228/archive/logs
 
+# ===== 5. ビルドとタイマーの有効化 =====
 cd "$ROOT/gateway"
 go build -trimpath -ldflags='-s -w' -o "$ROOT/bin/p1228-gateway" ./cmd/gateway
 cd "$ROOT/workers"
