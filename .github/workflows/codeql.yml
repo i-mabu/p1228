@@ -1,9 +1,20 @@
 # ===== 1. ワークフロー全体設定 =====
 name: CodeQL
 
+# push は main のみに絞り、二重起動を防ぐ。対象パスの変更時だけ実行する。
 on:
   push:
+    branches:
+      - main
+    paths:
+      - "gateway/**"
+      - "workers/**"
+      - ".github/workflows/**"
   pull_request:
+    paths:
+      - "gateway/**"
+      - "workers/**"
+      - ".github/workflows/**"
   schedule:
     - cron: "0 3 * * 1"
 
