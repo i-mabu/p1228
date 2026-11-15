@@ -59,7 +59,8 @@ govulncheck は **non-blocking**（`continue-on-error: true`）です。固定�
 ### CodeQL（codeql.yml）
 
 - 対象言語: Go と javascript-typescript
-- ジョブ単位で `security-events: write`（結果のアップロードに必要）と `actions: read` を付与し、それ以外は読み取りのみ
+- ジョブ単位で `security-events: write` と `actions: read` を付与し、それ以外は読み取りのみ
+- Code scanning（Advanced Security）は Organization 向けで、個人アカウントのプライベートリポジトリでは有効化できない。そのため結果は Code scanning へアップロードせず（`upload: never`）、SARIF を Actions の artifact（`codeql-sarif-*`、保持7日）として保存する。Organization へ移行して Code scanning を有効化した場合は、`upload` / `output` の指定と artifact 保存ステップを外せば Security タブ連携に戻せる
 
 ### Dependabot（.github/dependabot.yml）
 
