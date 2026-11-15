@@ -1,9 +1,19 @@
 # ===== 1. ワークフロー全体設定 =====
 name: p1228 CI
 
+# push は main のみに絞り、PRブランチの push と pull_request による二重起動を防ぐ。
+# ドキュメントのみの変更では起動しない。
 on:
   push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
 
 permissions:
   contents: read
@@ -13,45 +23,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ===== 2. フォーマットチェックジョブ =====
-  format:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.23.2"
-          cache-dependency-path: gateway/go.mod
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24.17.0"
-          cache: npm
-          cache-dependency-path: workers/package-lock.json
-      - name: Install shfmt
-        run: |
-          curl -sSfL -o /tmp/shfmt https://github.com/mvdan/sh/releases/download/v3.10.0/shfmt_v3.10.0_linux_amd64
-          sudo install -m 0755 /tmp/shfmt /usr/local/bin/shfmt
-          shfmt --version
-      - name: Go formatting (gofmt)
-        working-directory: gateway
-        run: |
-          unformatted="$(gofmt -l .)"
-          if [ -n "$unformatted" ]; then
-            echo "Unformatted Go files (run gofmt -w or scripts/format.sh):"
-            echo "$unformatted"
-            exit 1
-          fi
-      - name: Install Worker dependencies (format check only)
-        working-directory: workers
-        run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Prettier check
-        working-directory: workers
-        run: npm run format:check
-      - name: Shell formatting (shfmt)
-        run: shfmt -i 2 -ci -d deploy/install-ubuntu.sh deploy/scripts/*.sh scripts/format.sh .githooks/pre-commit
-
-  # ===== 3. Goジョブ =====
+  # ===== 2. Goジョブ =====
   go:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -107,7 +79,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  # ===== 4. Workersジョブ =====
+  # ===== 3. Workersジョブ =====
   workers:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -123,6 +95,9 @@ jobs:
       - name: Install Worker dependencies
         working-directory: workers
         run: npm ci --no-audit --no-fund
+      - name: Prettier check
+        working-directory: workers
+        run: npm run format:check
       - name: Type check
         working-directory: workers
         run: npm run typecheck
@@ -144,24 +119,31 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  # ===== 5. Shellジョブ =====
+  # ===== 4. Shellジョブ =====
   shell:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Install shellcheck
+      - name: Install shellcheck and shfmt
         run: |
           sudo apt-get update
           sudo apt-get install -y shellcheck
+          curl -sSfL -o /tmp/shfmt https://github.com/mvdan/sh/releases/download/v3.10.0/shfmt_v3.10.0_linux_amd64
+          sudo install -m 0755 /tmp/shfmt /usr/local/bin/shfmt
+          shfmt --version
       - name: Shell syntax
         run: bash -n deploy/install-ubuntu.sh deploy/scripts/*.sh scripts/format.sh .githooks/pre-commit
       - name: ShellCheck
         run: shellcheck deploy/install-ubuntu.sh deploy/scripts/*.sh scripts/format.sh .githooks/pre-commit
+      - name: Shell formatting (shfmt)
+        run: shfmt -i 2 -ci -d deploy/install-ubuntu.sh deploy/scripts/*.sh scripts/format.sh .githooks/pre-commit
 
-  # ===== 6. PowerShellジョブ =====
-  windows-powershell-syntax:
-    runs-on: windows-latest
+  # ===== 5. PowerShellジョブ =====
+  powershell-syntax:
+    # pwsh は Linux ランナーにも標準搭載されており、構文検証・静的解析・整形確認は
+    # OS に依存しない。Windows ランナーの2倍換算を避けるため ubuntu で実行する。
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
