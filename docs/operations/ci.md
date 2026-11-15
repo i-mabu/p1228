@@ -6,9 +6,9 @@
 
 | ワークフロー | ファイル | トリガー | 役割 |
 | --- | --- | --- | --- |
-| p1228 CI | `.github/workflows/ci.yml` | push / pull_request | 検証（チェックのみ。コードは変更しない） |
+| p1228 CI | `.github/workflows/ci.yml` | main への push / pull_request（ドキュメントのみの変更を除く） | 検証（チェックのみ。コードは変更しない） |
 | Format (auto-fix) | `.github/workflows/format.yml` | main への push / 手動実行 | フォーマッタの自動適用と自動コミット |
-| CodeQL | `.github/workflows/codeql.yml` | push / pull_request / 毎週月曜 03:00 UTC | 静的セキュリティ解析 |
+| CodeQL | `.github/workflows/codeql.yml` | main への push / pull_request（対象パスの変更時のみ） / 毎週月曜 03:00 UTC | 静的セキュリティ解析 |
 
 すべてのワークフロー共通の方針:
 
@@ -20,13 +20,15 @@
 
 ジョブは責務ごとに分割し、並列実行します。
 
-### format ジョブ（整形チェック）
+### 整形チェック（各ジョブに統合）
 
-- `gofmt -l`（gateway 配下に未整形の Go ファイルがないか）
-- Prettier `--check`（`npm run format:check`。対象は後述）
-- `shfmt -i 2 -ci -d`（Shell スクリプトの整形差分がないか）
+整形チェックは専用ジョブを置かず、各ジョブに統合しています（いずれも差分があれば失敗する blocking チェックです）。
 
-いずれも差分があればジョブが失敗します（blocking）。直し方は「5. 整形自動化」を参照してください。
+- `gofmt -l`（gateway 配下に未整形の Go ファイルがないか）: go ジョブ
+- Prettier `--check`（`npm run format:check`。対象は後述）: workers ジョブ
+- `shfmt -i 2 -ci -d`（Shell スクリプトの整形差分がないか）: shell ジョブ
+
+直し方は「5. 整形自動化」を参照してください。
 
 ### go ジョブ
 
@@ -41,17 +43,19 @@ govulncheck は **non-blocking**（`continue-on-error: true`）です。固定�
 ### workers ジョブ
 
 - ネイティブ依存（`@discordjs/opus`）のビルドに必要な `ffmpeg` と `libopus-dev` のインストール
-- `npm ci`、型チェック（`npm run typecheck` = `tsc --noEmit`）、`npm test`、`npm run build` を個別ステップで実行
+- `npm ci`、Prettier による整形チェック、型チェック（`npm run typecheck` = `tsc --noEmit`）、`npm test`、`npm run build` を個別ステップで実行
 - `npm audit --audit-level=high`（**non-blocking**。結果はログに残ります。高深刻度の脆弱性は Dependabot の更新 PR で追跡する運用とし、既知の脆弱性で恒常的に CI が落ちる状態を避けます）
 - `workers/dist` の artifact アップロード
 
 ### shell ジョブ
 
 - `bash -n` による構文チェック（deploy 配下、`scripts/format.sh`、`.githooks/pre-commit`）
+- `shfmt` による整形差分チェック（blocking）
 - ShellCheck（apt でインストール）による静的解析。指摘は原則としてスクリプト側を直し、直せない場合のみ理由付きの `shellcheck disable` コメントを使います
 
-### windows-powershell-syntax ジョブ
+### powershell-syntax ジョブ
 
+- pwsh は Linux ランナーにも標準搭載されており、以下の検証は OS に依存しないため `ubuntu-24.04` で実行します（Windows ランナーは分数が2倍換算されるため）
 - PowerShell パーサーによる構文検証（`deploy/windows/*.ps1` と `scripts/*.ps1`）
 - PSScriptAnalyzer: Severity が Error の指摘は blocking、Warning は表示のみ
 - `Invoke-Formatter` との差分チェック（表示のみ、non-blocking）
@@ -59,12 +63,14 @@ govulncheck は **non-blocking**（`continue-on-error: true`）です。固定�
 ### CodeQL（codeql.yml）
 
 - 対象言語: Go と javascript-typescript
+- 実行は main への push と pull_request のうち対象パス（`gateway/**`、`workers/**`、`.github/workflows/**`）が変わった場合と、毎週月曜 03:00 UTC のスケジュールのみ（Actions の分数節約のため）
 - ジョブ単位で `security-events: write` と `actions: read` を付与し、それ以外は読み取りのみ
 - Code scanning（Advanced Security）は Organization 向けで、個人アカウントのプライベートリポジトリでは有効化できない。そのため結果は Code scanning へアップロードせず（`upload: never`）、SARIF を Actions の artifact（`codeql-sarif-*`、保持7日）として保存する。Organization へ移行して Code scanning を有効化した場合は、`upload` / `output` の指定と artifact 保存ステップを外せば Security タブ連携に戻せる
 
 ### Dependabot（.github/dependabot.yml）
 
 - gomod（`/gateway`）、npm（`/workers`）、github-actions（`/`）の更新を毎週月曜に確認し、更新 PR を自動作成します
+- PR 数の抑制のため、gomod / npm は minor / patch 更新を1本の PR にグループ化し、github-actions は全更新を1本にグループ化します。同時に開く PR は各エコシステム3本まで（`open-pull-requests-limit: 3`）
 
 ## 3. ローカルでの再現コマンド
 
@@ -118,7 +124,7 @@ Prettier の対象範囲は、Workers の TypeScript / JSON と、設定ファ�
 
 ### 何がチェックで落ちるか
 
-- CI の format ジョブは整形差分を検出すると失敗します（blocking）。pull_request では自動修正は行われないため、ローカルで `scripts/format.sh` を実行してから push してください。
+- CI の各ジョブに統合された整形チェックは、整形差分を検出すると失敗します（blocking）。pull_request では自動修正は行われないため、ローカルで `scripts/format.sh` を実行してから push してください。
 
 ### 自動整形ワークフローの安全設計
 
