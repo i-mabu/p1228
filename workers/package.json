@@ -1,0 +1,28 @@
+{
+  "name": "p1228-workers",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.17.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev:general": "tsx src/general/index.ts",
+    "dev:read-aloud": "tsx src/read-aloud/index.ts",
+    "start:general": "node dist/general/index.js",
+    "start:read-aloud": "node dist/read-aloud/index.js",
+    "sync:commands": "tsx src/sync-commands.ts",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@discordjs/opus": "0.10.0",
+    "@discordjs/voice": "0.19.2",
+    "@snazzah/davey": "0.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  }
+}

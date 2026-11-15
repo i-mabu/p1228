@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+*.log
+*.pid
+.runtime/
+node_modules/
+workers/dist/
+gateway/bin/
+gateway/data/
+data/
+*.db
+*.db-shm
+*.db-wal
+*.zip
+.DS_Store
+gateway/gateway.exe

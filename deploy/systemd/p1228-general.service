@@ -1,0 +1,22 @@
+[Unit]
+Description=p1228 星燈 General Worker
+Wants=network-online.target p1228-gateway.service
+After=network-online.target p1228-gateway.service
+
+[Service]
+Type=simple
+User=p1228-general
+Group=p1228
+WorkingDirectory=/opt/p1228/workers
+EnvironmentFile=/etc/p1228/general.env
+ExecStart=/usr/bin/env node /opt/p1228/workers/dist/general/index.js
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

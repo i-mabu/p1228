@@ -1,0 +1,25 @@
+[Unit]
+Description=p1228 紡言 Read-aloud Worker
+Wants=network-online.target p1228-gateway.service
+After=network-online.target p1228-gateway.service
+
+[Service]
+Type=simple
+User=p1228-read-aloud-b
+Group=p1228
+WorkingDirectory=/opt/p1228/workers
+EnvironmentFile=/etc/p1228/read-aloud-b.env
+ExecStart=/usr/bin/env node /opt/p1228/workers/dist/read-aloud/index.js
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+UMask=0007
+LimitNOFILE=65535
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/cache/p1228/audio
+
+[Install]
+WantedBy=multi-user.target

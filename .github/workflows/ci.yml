@@ -1,0 +1,79 @@
+name: p1228 CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.2'
+          cache-dependency-path: gateway/go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.17.0'
+          cache: npm
+          cache-dependency-path: workers/package-lock.json
+      - name: Install native voice prerequisites
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg libopus-dev
+      - name: Go formatting
+        working-directory: gateway
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted Go files (run gofmt -w):"
+            echo "$unformatted"
+            exit 1
+          fi
+      - name: Go tests
+        working-directory: gateway
+        run: |
+          go vet ./...
+          go test ./...
+      - name: Install Worker dependencies
+        working-directory: workers
+        run: npm ci --no-audit --no-fund
+      - name: Worker tests
+        working-directory: workers
+        run: npm test
+      - name: TypeScript build
+        working-directory: workers
+        run: npm run build
+      - name: Shell syntax
+        run: bash -n deploy/install-ubuntu.sh deploy/scripts/*.sh
+      - name: Package source archive
+        if: success()
+        run: git archive --format=zip --prefix=p1228/ HEAD -o p1228-source.zip
+      - name: Upload source archive
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p1228-source-${{ github.sha }}
+          path: p1228-source.zip
+          if-no-files-found: error
+          retention-days: 7
+
+  windows-powershell-syntax:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PowerShell scripts
+        shell: pwsh
+        run: |
+          $parseFailures = @()
+          Get-ChildItem -Path deploy/windows -Filter '*.ps1' -File | ForEach-Object {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$parseErrors) | Out-Null
+            if ($parseErrors.Count -gt 0) {
+              $parseFailures += $parseErrors | ForEach-Object { "$($_.Extent.File):$($_.Extent.StartLineNumber): $($_.Message)" }
+            }
+          }
+          if ($parseFailures.Count -gt 0) {
+            $parseFailures | ForEach-Object { Write-Error $_ }
+            exit 1
+          }

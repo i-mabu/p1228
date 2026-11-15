@@ -1,0 +1,25 @@
+[Unit]
+Description=p1228 Go Gateway Proxy
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=p1228
+Group=p1228
+WorkingDirectory=/opt/p1228
+EnvironmentFile=/etc/p1228/gateway.env
+ExecStart=/opt/p1228/bin/p1228-gateway -config /etc/p1228/gateway.yaml
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+UMask=0077
+LimitNOFILE=65535
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/p1228
+
+[Install]
+WantedBy=multi-user.target

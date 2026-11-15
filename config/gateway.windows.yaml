@@ -1,0 +1,51 @@
+gateway:
+  listen_address: "127.0.0.1"
+  listen_port: 8787
+  event_lease_seconds: 30
+  max_event_attempts: 8
+  interaction_ttl_seconds: 900
+  event_payload_retention_hours: 24
+
+bots:
+  general:
+    display_name: "星燈"
+    watching: "サーバーを見守り中"
+    application_id: "${P1228_GENERAL_APPLICATION_ID}"
+    token_env: "P1228_GENERAL_BOT_TOKEN"
+    intents: 33411
+  read_aloud_a:
+    display_name: "言ノ葉"
+    watching: "言葉を紡ぎ中"
+    application_id: "${P1228_READ_ALOUD_A_APPLICATION_ID}"
+    token_env: "P1228_READ_ALOUD_A_BOT_TOKEN"
+    intents: 33409
+  read_aloud_b:
+    display_name: "紡言"
+    watching: "声をお届け中"
+    application_id: "${P1228_READ_ALOUD_B_APPLICATION_ID}"
+    token_env: "P1228_READ_ALOUD_B_BOT_TOKEN"
+    intents: 33409
+
+workers:
+  general:
+    worker_id: "general"
+    role: "general"
+    bot_id: "general"
+    secret_env: "P1228_GENERAL_WORKER_SECRET"
+  read_aloud_a:
+    worker_id: "read_aloud_a"
+    role: "read-aloud"
+    bot_id: "read_aloud_a"
+    secret_env: "P1228_READ_ALOUD_A_WORKER_SECRET"
+  read_aloud_b:
+    worker_id: "read_aloud_b"
+    role: "read-aloud"
+    bot_id: "read_aloud_b"
+    secret_env: "P1228_READ_ALOUD_B_WORKER_SECRET"
+
+database:
+  path: "./data/database/p1228.db"
+
+logging:
+  level: "info"
+  format: "json"
