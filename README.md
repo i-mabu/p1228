@@ -59,6 +59,22 @@ Go Gatewayが各BOTのDiscord Gateway接続、REST操作、Interaction応答、S
 
 Voice関連依存はバージョン固定です。更新時はCustom AdapterとDAVEを含むVoice E2E試験を再実施してください。
 
+## 🔨 ビルド（ワンコマンド）
+
+Go 製 Gateway と TypeScript 製 Workers の両方を 1 コマンドでビルドする
+スクリプトを用意している。Gateway は `go build ./...` と `go test ./...`、
+Workers は依存関係のインストール → 型チェック → ビルド → テストを実行する。
+失敗した場合は、そのステップで止まってどこで落ちたかを表示し、最後に
+両方の結果をまとめて表示する。
+
+```bat
+build.bat
+```
+
+```sh
+./build.sh
+```
+
 ## 🚀 Windowsで起動
 
 1. Go、Node.js、FFmpegをインストールし、必要な実行ファイルをPATHに追加します。
