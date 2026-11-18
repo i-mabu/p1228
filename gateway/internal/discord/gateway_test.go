@@ -158,8 +158,8 @@ func TestWorkerRecoveryPresenceRestoresConfiguredActivity(t *testing.T) {
 	}
 }
 
-func TestPresenceUpdateUsesWatchingActivity(t *testing.T) {
-	payload, err := json.Marshal(presenceUpdate(config.BotConfig{Watching: "サーバーを見守り中"}))
+func TestWorkerPresenceUpdateUsesWatchingActivity(t *testing.T) {
+	payload, err := json.Marshal(workerPresenceUpdate(config.BotConfig{Watching: "サーバーを見守り中"}, false))
 	if err != nil {
 		t.Fatal(err)
 	}

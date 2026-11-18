@@ -16,7 +16,7 @@ GitHub ActionsのCI設定はGo 1.23.2 / Node.js 24.17.0を使用します。
 
 - Go `go vet ./...` と `go test ./...`
 - Workerの `npm ci`、`npm test`、`npm run build`
-- Ubuntu上のBash構文検査と、Windows runner上のPowerShell構文検査
+- Ubuntu上のBash構文検査と、同じくUbuntu runner上のPowerShell構文検査
 - CI成功時のソースアーカイブ作成
 
 Go Storage testsは機能設定、Blacklist、Sticky state、point cap、lottery、shop purchase、daily omikujiを対象とします。実行ごとの成功・失敗は、対象commitに紐づくGitHub Actions runで確認してください。CI成功はDiscord実環境での動作保証ではありません。CIの詳細は [.github/workflows/ci.yml](../../.github/workflows/ci.yml) を参照してください。

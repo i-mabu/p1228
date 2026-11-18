@@ -14,7 +14,7 @@ export interface EventEnvelope<T = Record<string, unknown>> {
   session_id?: string;
   sequence: number;
   payload: T;
-  lease_token: string;
+  lease_token?: string;
   attempts: number;
   ephemeral?: boolean;
 }

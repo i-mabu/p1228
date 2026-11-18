@@ -9,6 +9,9 @@
 | p1228 CI | `.github/workflows/ci.yml` | main への push / pull_request（ドキュメントのみの変更を除く） | 検証（チェックのみ。コードは変更しない） |
 | Format (auto-fix) | `.github/workflows/format.yml` | main への push / 手動実行 | フォーマッタの自動適用と自動コミット |
 | CodeQL | `.github/workflows/codeql.yml` | main への push / pull_request（対象パスの変更時のみ） / 毎週月曜 03:00 UTC | 静的セキュリティ解析 |
+| Stale | `.github/workflows/stale.yml` | 毎週月曜 03:00 UTC のスケジュール / 手動実行 | 90日間動きのない Issue / PR に stale ラベルを付け、さらに30日で自動クローズ（`pinned` / `keep` ラベルは除外） |
+| Lock Threads | `.github/workflows/lock-threads.yml` | 毎週月曜 04:00 UTC のスケジュール / 手動実行 | クローズ / マージから30日経った Issue / PR の自動ロック |
+| Release Drafter | `.github/workflows/release-drafter.yml` | main への push / pull_request | マージされた PR からリリースノートの下書きを自動更新 |
 
 すべてのワークフロー共通の方針:
 

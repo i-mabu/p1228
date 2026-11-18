@@ -9,6 +9,10 @@ gateway:
   event_payload_retention_hours: 24
 
 # ===== 2. BOT定義 =====
+# 読み上げBOT (read_aloud_a / b) の intents (33409) は GUILD_MEMBERS を含まない。
+# GUILD_MEMBERS が必要になったら、Discord Developer Portal で特権インテント
+# (SERVER MEMBERS) を有効化した上で、値を 33411 に変更すること。
+# Portal で有効化せずに値を変えると Gateway に接続できなくなる。
 bots:
   general:
     display_name: "星燈"
@@ -23,13 +27,16 @@ bots:
     watching: "言葉を紡ぎ中"
     application_id: "${P1228_READ_ALOUD_A_APPLICATION_ID}"
     token_env: "P1228_READ_ALOUD_A_BOT_TOKEN"
-    # GUILDS | GUILD_MEMBERS | GUILD_VOICE_STATES | GUILD_MESSAGES | MESSAGE_CONTENT
+    # GUILDS | GUILD_VOICE_STATES | GUILD_MESSAGES | MESSAGE_CONTENT (GUILD_MEMBERS is not included)
+    # MESSAGE_CONTENT is a privileged intent in the Developer Portal.
     intents: 33409
   read_aloud_b:
     display_name: "紡言"
     watching: "声をお届け中"
     application_id: "${P1228_READ_ALOUD_B_APPLICATION_ID}"
     token_env: "P1228_READ_ALOUD_B_BOT_TOKEN"
+    # GUILDS | GUILD_VOICE_STATES | GUILD_MESSAGES | MESSAGE_CONTENT (GUILD_MEMBERS is not included)
+    # MESSAGE_CONTENT is a privileged intent in the Developer Portal.
     intents: 33409
 
 # ===== 3. Worker定義 =====

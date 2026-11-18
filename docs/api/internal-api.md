@@ -72,7 +72,7 @@ Workerへ配送されるdurable eventの形式です。
 - `edit_message`: `channel_id`、`message_id`、`content`
 - `delete_message`: `channel_id`、`message_id`
 - `sync_commands`: `application_id`、`commands`
-- `add_role` / `remove_role`: `guild_id`、`user_id`、`role_id`（General BOTのみ）
+- `add_role` / `remove_role`: `guild_id`、`user_id`、`role_id`（General BOTのみ。`remove_role` はGateway側で許可・実装済みだが、Worker側からの呼び出しは未実装）
 - `send_message` はRole Panel用の `components` を含められます。
 
 任意のURL・HTTP method・pathは受け付けません。各操作には一意な `operation_id` を指定します。成功済みoperationの再試行には保存済み結果を返します。外部結果が失敗または不明な操作を盲目的に再実行することは拒否されます。

@@ -302,10 +302,6 @@ func workerMissingAfterStartupGrace(startedAt, now time.Time) bool {
 }
 
 // ----- 3.1 プレゼンス生成 -----
-func presenceUpdate(bot config.BotConfig) map[string]any {
-	return workerPresenceUpdate(bot, false)
-}
-
 func workerPresenceUpdate(bot config.BotConfig, failed bool) map[string]any {
 	activity := bot.Watching
 	if failed {

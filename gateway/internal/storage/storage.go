@@ -12,7 +12,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -134,6 +133,8 @@ func (s *Storage) PruneExpiredEvents(ctx context.Context, retentionHours int) (i
 		return 0, err
 	}
 	deleted, _ := res.RowsAffected()
+	// NOTE: event_idempotency_keys currently has no writers; nothing inserts keys yet.
+	// Only this expiry cleanup runs, so the table stays empty until recording is implemented.
 	if _, err = tx.ExecContext(ctx, `DELETE FROM event_idempotency_keys WHERE expires_at < ?`, time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
 		return 0, err
 	}
@@ -434,7 +435,7 @@ func validScope(scope, scopeID string) bool {
 	return (scope == "global" && scopeID == "global") || ((scope == "guild" || scope == "user") && strings.TrimSpace(scopeID) != "")
 }
 
-// ===== 6. 読み上げ設定・辞書・統計 =====
+// ===== 6. 読み上げ設定・辞書 =====
 func (s *Storage) GetReadAloudSettings(ctx context.Context, scope, scopeID string) (json.RawMessage, int64, error) {
 	if !validScope(scope, scopeID) {
 		return nil, 0, errors.New("invalid scope")
@@ -551,40 +552,4 @@ func (s *Storage) PutDictionaryEntry(ctx context.Context, scope, scopeID, word, 
 		return err
 	}
 	return tx.Commit()
-}
-
-// ----- 6.2 統計とデッドレター -----
-func (s *Storage) CountByStatus(ctx context.Context, botID string) (map[string]int, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT status,COUNT(*) FROM event_inbox WHERE bot_id=? GROUP BY status`, botID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	m := map[string]int{}
-	for rows.Next() {
-		var k string
-		var n int
-		if err := rows.Scan(&k, &n); err != nil {
-			return nil, err
-		}
-		m[k] = n
-	}
-	return m, rows.Err()
-}
-func (s *Storage) DeadLetterIDs(ctx context.Context) ([]string, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT event_id FROM event_dead_letters ORDER BY created_at DESC`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var ids []string
-	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	sort.Strings(ids)
-	return ids, rows.Err()
 }
