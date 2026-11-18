@@ -4,10 +4,10 @@
 
 ## 🗂️ 保存場所と保持期間
 
-| 対象 | 場所 | 保持期間 |
-|---|---|---|
-| journalアーカイブ | `/var/spool/p1228/archive/logs/` | 90日 |
-| SQLite日次バックアップ | `/var/backups/p1228/sqlite/` | 直近7世代 |
+| 対象                   | 場所                                        | 保持期間       |
+| ---------------------- | ------------------------------------------- | -------------- |
+| journalアーカイブ      | `/var/spool/p1228/archive/logs/`            | 90日           |
+| SQLite日次バックアップ | `/var/backups/p1228/sqlite/`                | 直近7世代      |
 | SQLite週次バックアップ | `/var/backups/p1228/sqlite/weekly/YYYY/WW/` | 84日（12週間） |
 
 journalアーカイブは前日分を `deploy/scripts/archive-logs.sh`（`p1228-log-archive.timer`、毎日03:20 UTC）が作成します。SQLiteバックアップは `deploy/scripts/backup-sqlite.sh`（`p1228-db-backup.timer`、毎日03:50 UTC）が作成します。

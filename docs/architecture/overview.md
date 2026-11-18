@@ -35,14 +35,14 @@ Local archive: compressed log archives + verified SQLite backups
 
 ## 🧩 コンポーネントの責務
 
-| コンポーネント | 責務 |
-|---|---|
-| Go Gateway | Discord Gateway接続、Resume、REST許可リスト、Interaction応答、内部HTTP API |
-| SQLite Storage | イベントInbox、Worker状態、設定、辞書、操作記録、機能データ |
-| General Worker | 星燈のサーバー機能・管理コマンド |
-| Read-aloud Workers | 各BOTの読み上げコマンド、Voice接続、再生キュー |
-| Audio Engine | VOICEVOX ENGINE互換HTTP APIによる音声合成 |
-| Local archive | ログ・SQLiteバックアップのローカル保持 |
+| コンポーネント     | 責務                                                                       |
+| ------------------ | -------------------------------------------------------------------------- |
+| Go Gateway         | Discord Gateway接続、Resume、REST許可リスト、Interaction応答、内部HTTP API |
+| SQLite Storage     | イベントInbox、Worker状態、設定、辞書、操作記録、機能データ                |
+| General Worker     | 星燈のサーバー機能・管理コマンド                                           |
+| Read-aloud Workers | 各BOTの読み上げコマンド、Voice接続、再生キュー                             |
+| Audio Engine       | VOICEVOX ENGINE互換HTTP APIによる音声合成                                  |
+| Local archive      | ログ・SQLiteバックアップのローカル保持                                     |
 
 言ノ葉と紡言は同じWorkerコードを別プロセスで実行します。Voiceセッション・キュー・プロセスは独立し、設定と辞書は共有します。
 

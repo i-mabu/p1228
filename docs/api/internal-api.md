@@ -20,26 +20,26 @@ Worker identityはGateway設定から解決します。Body内の `bot_id` は�
 
 ## 🗺️ Route一覧
 
-| Method | Path | 用途 |
-|---|---|---|
-| GET | `/health` | Storage / readiness probe（loopback限定） |
-| POST | `/worker/register` | `instance_id` を登録 |
-| POST | `/worker/heartbeat` | Worker heartbeat |
-| POST | `/events/claim` | durable event / ephemeral voice eventをclaim |
-| POST | `/events/{event_id}/ack` | durable eventをACK |
-| POST | `/events/{event_id}/nack` | NACK・再試行・DLQ |
-| POST | `/discord/operations` | 許可リスト経由のDiscord REST操作 |
-| POST | `/interactions/{interaction_ref}/initial` | 初回Interaction応答 |
-| POST | `/interactions/{interaction_ref}/edit-original` | defer後のoriginal response編集 |
-| POST | `/interactions/{interaction_ref}/followups` | follow-up応答 |
-| POST | `/voice/gateway-payload` | Voice adapter → Gateway opcode 4 |
-| GET / PUT | `/data/read-aloud/settings?scope=...&scope_id=...` | 共有読み上げ設定 |
-| GET / POST | `/data/dictionary/entries?scope=...&scope_id=...` | 共有辞書 |
-| GET / PUT | `/data/star/settings?guild_id=...` | General BOTのGuild機能設定 |
-| GET / POST / DELETE | `/data/star/blacklist` | 自動ロールBlacklist |
-| GET / PUT / POST / DELETE | `/data/star/sticky` | Sticky message設定 |
-| POST | `/data/star/points` | ポイント・抽選・おみくじ |
-| GET / PUT / POST | `/data/star/shop` | ロールショップ・購入 |
+| Method                    | Path                                               | 用途                                         |
+| ------------------------- | -------------------------------------------------- | -------------------------------------------- |
+| GET                       | `/health`                                          | Storage / readiness probe（loopback限定）    |
+| POST                      | `/worker/register`                                 | `instance_id` を登録                         |
+| POST                      | `/worker/heartbeat`                                | Worker heartbeat                             |
+| POST                      | `/events/claim`                                    | durable event / ephemeral voice eventをclaim |
+| POST                      | `/events/{event_id}/ack`                           | durable eventをACK                           |
+| POST                      | `/events/{event_id}/nack`                          | NACK・再試行・DLQ                            |
+| POST                      | `/discord/operations`                              | 許可リスト経由のDiscord REST操作             |
+| POST                      | `/interactions/{interaction_ref}/initial`          | 初回Interaction応答                          |
+| POST                      | `/interactions/{interaction_ref}/edit-original`    | defer後のoriginal response編集               |
+| POST                      | `/interactions/{interaction_ref}/followups`        | follow-up応答                                |
+| POST                      | `/voice/gateway-payload`                           | Voice adapter → Gateway opcode 4             |
+| GET / PUT                 | `/data/read-aloud/settings?scope=...&scope_id=...` | 共有読み上げ設定                             |
+| GET / POST                | `/data/dictionary/entries?scope=...&scope_id=...`  | 共有辞書                                     |
+| GET / PUT                 | `/data/star/settings?guild_id=...`                 | General BOTのGuild機能設定                   |
+| GET / POST / DELETE       | `/data/star/blacklist`                             | 自動ロールBlacklist                          |
+| GET / PUT / POST / DELETE | `/data/star/sticky`                                | Sticky message設定                           |
+| POST                      | `/data/star/points`                                | ポイント・抽選・おみくじ                     |
+| GET / PUT / POST          | `/data/star/shop`                                  | ロールショップ・購入                         |
 
 `scope` は `global`、`guild`、`user` のいずれかです。`global` の場合は `scope_id=global` を指定します。
 

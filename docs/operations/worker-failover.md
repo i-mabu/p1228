@@ -4,14 +4,14 @@ Go Gatewayは各BOTのDiscord Gateway WebSocket接続を所有しています。
 
 ## ⏱️ 判定値
 
-| 項目 | 値 |
-|---|---|
-| Heartbeat cadence | 10秒（Worker側） |
-| Failure threshold | 35秒 heartbeatなし |
-| Monitor interval | 5秒 |
-| 未登録Workerの初期猶予 | Gateway起動後60秒 |
-| 障害時表示 | `障害対応中：Worker応答なし` |
-| 復旧時 | configに設定された `watching` 表示へ戻す |
+| 項目                   | 値                                       |
+| ---------------------- | ---------------------------------------- |
+| Heartbeat cadence      | 10秒（Worker側）                         |
+| Failure threshold      | 35秒 heartbeatなし                       |
+| Monitor interval       | 5秒                                      |
+| 未登録Workerの初期猶予 | Gateway起動後60秒                        |
+| 障害時表示             | `障害対応中：Worker応答なし`             |
+| 復旧時                 | configに設定された `watching` 表示へ戻す |
 
 `general`、`read_aloud_a`、`read_aloud_b` はそれぞれ独立して判定されます。
 

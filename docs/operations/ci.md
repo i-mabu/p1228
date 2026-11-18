@@ -4,14 +4,14 @@
 
 ## 1. ワークフロー構成
 
-| ワークフロー | ファイル | トリガー | 役割 |
-| --- | --- | --- | --- |
-| p1228 CI | `.github/workflows/ci.yml` | main への push / pull_request（ドキュメントのみの変更を除く） | 検証（チェックのみ。コードは変更しない） |
-| Format (auto-fix) | `.github/workflows/format.yml` | main への push / 手動実行 | フォーマッタの自動適用と自動コミット |
-| CodeQL | `.github/workflows/codeql.yml` | main への push / pull_request（対象パスの変更時のみ） / 毎週月曜 03:00 UTC | 静的セキュリティ解析 |
-| Stale | `.github/workflows/stale.yml` | 毎週月曜 03:00 UTC のスケジュール / 手動実行 | 90日間動きのない Issue / PR に stale ラベルを付け、さらに30日で自動クローズ（`pinned` / `keep` ラベルは除外） |
-| Lock Threads | `.github/workflows/lock-threads.yml` | 毎週月曜 04:00 UTC のスケジュール / 手動実行 | クローズ / マージから30日経った Issue / PR の自動ロック |
-| Release Drafter | `.github/workflows/release-drafter.yml` | main への push / pull_request | マージされた PR からリリースノートの下書きを自動更新 |
+| ワークフロー      | ファイル                                | トリガー                                                                   | 役割                                                                                                          |
+| ----------------- | --------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| p1228 CI          | `.github/workflows/ci.yml`              | main への push / pull_request（ドキュメントのみの変更を除く）              | 検証（チェックのみ。コードは変更しない）                                                                      |
+| Format (auto-fix) | `.github/workflows/format.yml`          | main への push / 手動実行                                                  | フォーマッタの自動適用と自動コミット                                                                          |
+| CodeQL            | `.github/workflows/codeql.yml`          | main への push / pull_request（対象パスの変更時のみ） / 毎週月曜 03:00 UTC | 静的セキュリティ解析                                                                                          |
+| Stale             | `.github/workflows/stale.yml`           | 毎週月曜 03:00 UTC のスケジュール / 手動実行                               | 90日間動きのない Issue / PR に stale ラベルを付け、さらに30日で自動クローズ（`pinned` / `keep` ラベルは除外） |
+| Lock Threads      | `.github/workflows/lock-threads.yml`    | 毎週月曜 04:00 UTC のスケジュール / 手動実行                               | クローズ / マージから30日経った Issue / PR の自動ロック                                                       |
+| Release Drafter   | `.github/workflows/release-drafter.yml` | main への push / pull_request                                              | マージされた PR からリリースノートの下書きを自動更新                                                          |
 
 すべてのワークフロー共通の方針:
 
@@ -106,13 +106,13 @@ shfmt -i 2 -ci -d deploy/install-ubuntu.sh deploy/scripts/*.sh scripts/format.sh
 
 ## 4. 整形ルール
 
-| 対象 | ツール | 設定 |
-| --- | --- | --- |
-| Go | gofmt | 標準（追加設定なし） |
+| 対象                     | ツール                                  | 設定                                                                                                                                                                                                              |
+| ------------------------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Go                       | gofmt                                   | 標準（追加設定なし）                                                                                                                                                                                              |
 | TypeScript / JSON / YAML | Prettier 3.10.1（devDependency に固定） | リポジトリ直下の `.prettierrc.json`。単一引用符・セミコロンあり・インデント2スペース・`printWidth` 200（既存コードの長い行を尊重するため）。YAML のみ引用符は二重引用符を維持（override で `singleQuote: false`） |
-| Shell | shfmt v3.10.0 | `-i 2 -ci`（インデント2スペース、case パターンをインデント） |
-| PowerShell | PSScriptAnalyzer（`Invoke-Formatter`） | CI では差分表示のみ。ローカルで内容を確認して手動適用 |
-| 全般 | `.editorconfig` | 文字コード・改行コード・インデントの宣言 |
+| Shell                    | shfmt v3.10.0                           | `-i 2 -ci`（インデント2スペース、case パターンをインデント）                                                                                                                                                      |
+| PowerShell               | PSScriptAnalyzer（`Invoke-Formatter`）  | CI では差分表示のみ。ローカルで内容を確認して手動適用                                                                                                                                                             |
+| 全般                     | `.editorconfig`                         | 文字コード・改行コード・インデントの宣言                                                                                                                                                                          |
 
 Prettier の対象範囲は、Workers の TypeScript / JSON と、設定ファイル（`config/*.yaml`、`.github/workflows/*.yml`、`.github/dependabot.yml`）です。リポジトリ全体の Markdown は対象外です。
 

@@ -9,28 +9,28 @@ SQLiteはGo Gatewayが管理します。WorkerがDBファイルを直接開く�
 
 ## 📚 テーブル一覧
 
-| Table | 用途 |
-|---|---|
-| `bots` | BOT identity / Discord Application mapping |
-| `guilds`、`users` | Discord entity metadata |
-| `guild_settings`、`user_settings` | scope別設定 |
-| `dictionaries`、`dictionary_entries` | 共有辞書・revision |
-| `read_aloud_settings` | Global / Guild / User読み上げ設定 |
-| `audio_engine_settings` | Audio Engine設定slot |
-| `gateway_sessions` | BOT別Gateway Resume state・last sequence |
-| `event_inbox` | at-least-once Worker queue |
-| `event_dead_letters` | retry exhausted / retention expired metadata |
-| `worker_instances` | Worker identity・heartbeat |
-| `discord_operations` | 外部副作用operation status |
-| `event_idempotency_keys` | Handler側idempotency expiry |
-| `audit_logs` | 設定・辞書の変更履歴 |
-| `guild_feature_settings` | StarTomoのGuild別機能設定 |
-| `guild_user_blacklist` | 自動ロール・Role Panel deny list |
-| `sticky_messages` | channelごとの自動再投稿メッセージ |
-| `point_accounts`、`point_ledger` | 残高・日次上限・取引履歴 |
-| `shop_items`、`user_inventory` | Role Shop商品・購入状態 |
-| `omikuji_draws`、`star_feature_actions` | 日次おみくじ・再試行可能なゲーム結果 |
-| `schema_migrations` | 適用済みmigration version |
+| Table                                   | 用途                                         |
+| --------------------------------------- | -------------------------------------------- |
+| `bots`                                  | BOT identity / Discord Application mapping   |
+| `guilds`、`users`                       | Discord entity metadata                      |
+| `guild_settings`、`user_settings`       | scope別設定                                  |
+| `dictionaries`、`dictionary_entries`    | 共有辞書・revision                           |
+| `read_aloud_settings`                   | Global / Guild / User読み上げ設定            |
+| `audio_engine_settings`                 | Audio Engine設定slot                         |
+| `gateway_sessions`                      | BOT別Gateway Resume state・last sequence     |
+| `event_inbox`                           | at-least-once Worker queue                   |
+| `event_dead_letters`                    | retry exhausted / retention expired metadata |
+| `worker_instances`                      | Worker identity・heartbeat                   |
+| `discord_operations`                    | 外部副作用operation status                   |
+| `event_idempotency_keys`                | Handler側idempotency expiry                  |
+| `audit_logs`                            | 設定・辞書の変更履歴                         |
+| `guild_feature_settings`                | StarTomoのGuild別機能設定                    |
+| `guild_user_blacklist`                  | 自動ロール・Role Panel deny list             |
+| `sticky_messages`                       | channelごとの自動再投稿メッセージ            |
+| `point_accounts`、`point_ledger`        | 残高・日次上限・取引履歴                     |
+| `shop_items`、`user_inventory`          | Role Shop商品・購入状態                      |
+| `omikuji_draws`、`star_feature_actions` | 日次おみくじ・再試行可能なゲーム結果         |
+| `schema_migrations`                     | 適用済みmigration version                    |
 
 ## ⚙️ SQLite設定
 
