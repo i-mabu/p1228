@@ -188,6 +188,8 @@ func (s *Server) claim(w http.ResponseWriter, r *http.Request, a authContext) {
 		return
 	}
 	if a.Worker.Role == "read-aloud" {
+		// Voice events are claimed before persisted inbox events: they live
+		// only in memory and the Gateway drops them after 30 seconds.
 		ephemeral := s.gateway.ClaimVoiceEvent(a.Worker.BotID)
 		if ephemeral != nil {
 			writeJSON(w, 200, map[string]any{"success": true, "event": ephemeral})

@@ -22,6 +22,8 @@ async function handle(event: EventEnvelope, client: GatewayClient): Promise<void
     return;
   }
 
+  // Allowlist: forward only the event types handleStarEvent handles;
+  // anything else is dropped here without reaching it.
   if (
     event.event_type !== 'INTERACTION_CREATE' &&
     event.event_type !== 'MESSAGE_CREATE' &&

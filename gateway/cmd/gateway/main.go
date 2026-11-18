@@ -29,6 +29,8 @@ func run() error {
 	configPath := flag.String("config", "./config/gateway.yaml", "path to gateway YAML configuration")
 	flag.Parse()
 
+	// Bootstrap logger with defaults until the config is loaded; it is
+	// replaced by a config-driven logger right after Load succeeds.
 	log := logging.New("info", "json")
 	cfg, err := config.Load(*configPath)
 	if err != nil {

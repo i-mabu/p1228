@@ -705,6 +705,8 @@ func (m *Manager) DiscordOperation(ctx context.Context, botID string, op map[str
 }
 func (m *Manager) doREST(ctx context.Context, token, method, path string, body []byte) (int, []byte, error) {
 	client := m.httpClient
+	// Only HTTP 429 is retried (after Discord's retry_after delay), up to
+	// 3 attempts in total; any other non-2xx status returns at once.
 	for attempt := 0; attempt < 3; attempt++ {
 		var rd io.Reader
 		if len(body) > 0 {

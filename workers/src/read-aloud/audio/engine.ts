@@ -80,6 +80,8 @@ export class AudioEngineClient {
       }
       const audio = await readFile(path);
       if (!isWav(audio)) return null;
+      // Refresh mtime on a hit: enforceCacheLimit evicts oldest-first, so
+      // this touch is what makes the cache eviction least-recently-used.
       const now = new Date();
       await utimes(path, now, now).catch(() => undefined);
       return audio;

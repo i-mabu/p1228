@@ -81,6 +81,8 @@ func Open(path string) (*Storage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open sqlite: %w", err)
 	}
+	// A single connection serializes all SQLite access (together with
+	// writeMu), avoiding "database is locked" errors under concurrency.
 	db.SetMaxOpenConns(1)
 	db.SetMaxIdleConns(1)
 	db.SetConnMaxLifetime(0)
@@ -149,6 +151,10 @@ func (s *Storage) migrate(ctx context.Context) error {
 		return err
 	}
 	defer tx.Rollback()
+	// Migrations 1-2 use IF NOT EXISTS throughout, so they are safely
+	// re-applied on every startup. Migrations 3-4 are not idempotent
+	// (ALTER TABLE / one-time backfill), so each runs only when
+	// schema_migrations shows it has not been applied yet.
 	if _, err = tx.ExecContext(ctx, initialMigration); err != nil {
 		return fmt.Errorf("apply migration 1: %w", err)
 	}
@@ -231,6 +237,8 @@ func (s *Storage) LoadSession(ctx context.Context, botID string) (Session, error
 	var v Session
 	err := s.db.QueryRowContext(ctx, `SELECT bot_id,session_id,resume_gateway_url,last_sequence,bot_user_id FROM gateway_sessions WHERE bot_id=?`, botID).Scan(&v.BotID, &v.SessionID, &v.ResumeURL, &v.Sequence, &v.BotUserID)
 	if errors.Is(err, sql.ErrNoRows) {
+		// No stored session yet: Sequence -1 marks "no session", distinct
+		// from a real sequence of 0, so callers Identify instead of Resume.
 		return Session{BotID: botID, Sequence: -1}, nil
 	}
 	return v, err

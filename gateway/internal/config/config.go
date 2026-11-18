@@ -153,6 +153,8 @@ func Load(path string) (*Config, error) {
 		seenApps[bot.ApplicationID] = id
 		c.Bots[id] = bot
 	}
+	// The per-entry checks above accept any ID, so pin the deployment to
+	// exactly the three expected bots (and, below, their three workers).
 	if len(c.Bots) != 3 {
 		return nil, fmt.Errorf("exactly 3 bots are required (general, read_aloud_a, read_aloud_b); got %d", len(c.Bots))
 	}

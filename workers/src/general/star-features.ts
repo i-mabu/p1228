@@ -7,6 +7,9 @@ type InteractionWithRef = InteractionPayload & { interaction_ref: string; messag
 type GuildChannel = { id: string; type: number; parent_id?: string | null };
 type RoleCache = Map<string, Set<string>>;
 
+// In-memory snapshots only: rebuilt from GUILD_CREATE after a restart and
+// dropped on GUILD_DELETE. Role changes are logged only when a member's
+// previous roles are already in memberRoles (see handleGuildMember).
 const guildChannelParents = new Map<string, string>();
 const guildNames = new Map<string, string>();
 const memberRoles: RoleCache = new Map();
