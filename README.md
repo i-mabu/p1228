@@ -52,7 +52,7 @@ Go Gatewayが各BOTのDiscord Gateway接続、REST操作、Interaction応答、S
 | 項目          | 要件・用途                                          |
 | ------------- | --------------------------------------------------- |
 | OS            | Windows 10/11（開発）、Ubuntu 24.04 LTS（本番手順） |
-| Go            | 1.23以上                                            |
+| Go            | 1.26以上                                            |
 | Node.js / npm | Node.js 24.17以上、npm 10以上を推奨                 |
 | FFmpeg / Opus | Voice音声再生                                       |
 | SQLite CLI    | 運用時のDB検査・バックアップ                        |
@@ -100,7 +100,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 ## 🐧 Ubuntu 24.04へ配置
 
-1. リポジトリを `/opt/p1228` に配置し、Go 1.23以上とNode.js 24.17以上をインストールします。
+1. リポジトリを `/opt/p1228` に配置し、Go 1.26以上とNode.js 24.17以上をインストールします。
 2. ベース環境をインストールします。スクリプトはBOTサービスを自動起動しません。
 
 ```bash
@@ -133,7 +133,7 @@ systemctl status p1228-gateway p1228-general p1228-read-aloud-a p1228-read-aloud
 
 ## 🧪 検証状況
 
-GitHub Actions CIでは、Go 1.23.2 / Node.js 24.17.0を使用し、`go vet ./...`、`go test ./...`、`npm ci`、`npm test`、`npm run build`、Bash・PowerShell構文検査を実行します。CI成功はDiscord実接続や本番環境の動作を保証するものではありません。
+GitHub Actions CIでは、Go 1.26.0 / Node.js 24.17.0を使用し、`go vet ./...`、`go test ./...`、`npm ci`、`npm test`、`npm run build`、Bash・PowerShell構文検査を実行します。CI成功はDiscord実接続や本番環境の動作を保証するものではありません。
 
 Discord実接続、コマンド登録、権限、Voice/DAVE/UDP/Opus、ローカルバックアップ・復元は未検証です。本番化前に [本番投入前チェックリスト](./docs/operations/production-checklist.md) を完了してください。
 

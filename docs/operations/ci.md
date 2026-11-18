@@ -41,7 +41,7 @@
 - `govulncheck`（`golang.org/x/vuln/cmd/govulncheck@v1.1.4` をバージョン固定で実行）
 - ソースアーカイブ（`git archive`）の作成と artifact アップロード
 
-govulncheck は **non-blocking**（`continue-on-error: true`）です。固定している Go 1.23.2 は現在の脆弱性データベースでは標準ライブラリの既知の脆弱性が多数報告されるため、blocking にすると恒常的に CI が落ちます。結果はログで確認でき、対応は Go 本体のバージョンアップとして別途判断してください。
+govulncheck は **non-blocking**（`continue-on-error: true`）です。固定している Go 1.26.0（modernc.org/sqlite 1.62 の要件に合わせたもの）でも、脆弱性データベースの更新により標準ライブラリの既知の脆弱性が報告されうるため、blocking にすると CI が恒常的に落ちるおそれがあります。結果はログで確認でき、対応は Go 本体のバージョンアップとして別途判断してください。
 
 ### workers ジョブ
 

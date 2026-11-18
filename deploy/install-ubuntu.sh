@@ -14,8 +14,8 @@ for command in go node npm; do command -v "$command" >/dev/null || {
 }; done
 GO_VERSION="$(go version | awk '{print $3}' | sed 's/^go//')"
 NODE_VERSION="$(node --version | sed 's/^v//')"
-if [[ "$(printf '%s\n' 1.23.0 "$GO_VERSION" | sort -V | head -n1)" != "1.23.0" ]]; then
-  echo "Go >= 1.23.0 required; found $GO_VERSION" >&2
+if [[ "$(printf '%s\n' 1.26.0 "$GO_VERSION" | sort -V | head -n1)" != "1.26.0" ]]; then
+  echo "Go >= 1.26.0 required; found $GO_VERSION" >&2
   exit 1
 fi
 if [[ "$(printf '%s\n' 24.17.0 "$NODE_VERSION" | sort -V | head -n1)" != "24.17.0" ]]; then

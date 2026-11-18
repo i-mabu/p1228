@@ -22,7 +22,7 @@ $nodeVersion = (& node --version) -join ' '
 $nodeNumeric = [version]($nodeVersion.TrimStart('v'))
 if ($nodeNumeric -lt [version]'24.17.0') { throw "Node.js 24.17.0 or newer is required; found $nodeVersion" }
 $goNumeric = [version](((& go version) -split 'go')[-1].Split(' ')[0])
-if ($goNumeric -lt [version]'1.23.0') { throw "Go 1.23.0 or newer is required; found $goVersion" }
+if ($goNumeric -lt [version]'1.26.0') { throw "Go 1.26.0 or newer is required; found $goVersion" }
 Write-Host "Building p1228 ($goVersion, $nodeVersion)"
 
 # ===== 2. ビルド =====

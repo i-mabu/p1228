@@ -9,7 +9,7 @@ cd /d "%~dp0"
 
 where go >nul 2>nul
 if errorlevel 1 (
-  echo ERROR: Go が見つかりません。Go 1.23 以上をインストールしてください。 1>&2
+  echo ERROR: Go が見つかりません。Go 1.26 以上をインストールしてください。 1>&2
   exit /b 1
 )
 where npm >nul 2>nul

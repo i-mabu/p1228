@@ -12,7 +12,7 @@
 
 ## 🧪 CIで確認される範囲
 
-GitHub ActionsのCI設定はGo 1.23.2 / Node.js 24.17.0を使用します。
+GitHub ActionsのCI設定はGo 1.26.0 / Node.js 24.17.0を使用します。
 
 - Go `go vet ./...` と `go test ./...`
 - Workerの `npm ci`、`npm test`、`npm run build`
