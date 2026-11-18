@@ -3,7 +3,7 @@
 name: Stale
 on:
   schedule:
-    - cron: '0 3 * * 1'
+    - cron: "0 3 * * 1"
   workflow_dispatch:
 permissions:
   issues: write
@@ -15,11 +15,11 @@ jobs:
     steps:
       - uses: actions/stale@v9
         with:
-          stale-issue-message: '長期間更新がないため stale ラベルを付けました。継続する場合はコメントをお願いします。'
-          stale-pr-message: '長期間更新がないため stale ラベルを付けました。継続する場合はコメントをお願いします。'
-          close-issue-message: 'stale のまま30日が経過したためクローズします。再開する場合は新しい Issue を作成してください。'
-          close-pr-message: 'stale のまま30日が経過したためクローズします。'
+          stale-issue-message: "長期間更新がないため stale ラベルを付けました。継続する場合はコメントをお願いします。"
+          stale-pr-message: "長期間更新がないため stale ラベルを付けました。継続する場合はコメントをお願いします。"
+          close-issue-message: "stale のまま30日が経過したためクローズします。再開する場合は新しい Issue を作成してください。"
+          close-pr-message: "stale のまま30日が経過したためクローズします。"
           days-before-stale: 90
           days-before-close: 30
-          exempt-issue-labels: 'pinned,keep'
-          exempt-pr-labels: 'pinned,keep'
+          exempt-issue-labels: "pinned,keep"
+          exempt-pr-labels: "pinned,keep"
