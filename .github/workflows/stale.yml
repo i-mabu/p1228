@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v11
         with:
           stale-issue-message: "長期間更新がないため stale ラベルを付けました。継続する場合はコメントをお願いします。"
           stale-pr-message: "長期間更新がないため stale ラベルを付けました。継続する場合はコメントをお願いします。"
