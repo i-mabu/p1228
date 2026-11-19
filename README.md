@@ -5,6 +5,9 @@ Discord BOT 3体を、**Go Gateway + 独立した TypeScript Worker** で運用�
 > [!WARNING]
 > **本番運用前の注意:** このリポジトリは設計に基づく初期実装です。Discord実接続、権限、Slash Command、Voice/DAVE、ローカルバックアップ復元の実環境検証は別途必要です。既存BOTからの全機能移行も完了していません。
 
+> [!NOTE]
+> **現行システムについて:** 現在のシステムは後継の **p1228-java**（Java 実装）に移行済みです。このリポジトリは初期実装として残しているものです。
+
 ## ✨ BOT構成
 
 | BOT    | Worker ID      | 主な役割                      | Watching表示       |
